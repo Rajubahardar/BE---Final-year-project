@@ -1,7 +1,4 @@
 ﻿slprj/
-sfprj/
 *.slxc
+*.mexw64
 *.asv
-*.autosave
-.DS_Store
-Thumbs.db

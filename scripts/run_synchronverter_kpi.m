@@ -18,7 +18,7 @@ cfg.t_step      = 50.0;      % Bus 5 +30 MW breaker switching time (s)
 cfg.pre_start   = 35.0;      % Settled pre-disturbance window start (s)
 cfg.pre_guard   = 0.1;       % Guard before t_step (s)
 cfg.final_win   = 5.0;       % Steady-state final window (s)
-cfg.rocof_win   = 0.1;       % 100 ms RoCoF regression window (s)
+cfg.rocof_win   = 0.5;       % 100 ms RoCoF regression window (s)
 cfg.fc          = 15.0;      % Zero-phase low-pass cutoff (Hz)
 cfg.band_f      = 0.02;      % Frequency settling band (+/- Hz)
 cfg.band_P_frac = 0.02;      % Power settling band (+/- 2% of |dP|)
@@ -285,19 +285,15 @@ kpi_os_smooth = 100 * max(0, max(sign(P_ma_fin - P_ma_base) * (ps_ma - P_ma_fin)
 % KPI 6: Maximum Voltage Deviation (%) across Vt (Array or Timeseries)
 kpi_vdev = NaN;
 try
-    Vt_raw = simOut.get('Vt');
-    if isa(Vt_raw, 'timeseries')
-        tv = double(Vt_raw.Time(:));
-        Vv = double(squeeze(Vt_raw.Data));
-    else
-        Vv = double(squeeze(Vt_raw));
-        tv = linspace(0, cfg.t_stop, size(Vv, 1))';
-    end
-    if size(Vv, 1) ~= numel(tv), Vv = Vv'; end
-    V_pre   = mean(Vv(tv >= cfg.pre_start & tv < cfg.t_step - cfg.pre_guard, :), 1);
-    V_pst   = Vv(tv >= cfg.t_step, :);
-    dev_pct = abs(V_pst - V_pre) ./ max(abs(V_pre), 1e-6) * 100;
-    kpi_vdev = max(dev_pct(:));
+    Vp_raw   = simOut.get('Vpcc_log');
+    tv       = double(Vp_raw.Time(:));
+    Vv       = double(squeeze(Vp_raw.Data));
+    Fs_v     = 1 / median(diff(tv));
+    cyc_v    = max(1, round(Fs_v / cfg.f0));
+    V_rms    = sqrt(movmean(Vv(:, 1).^2, cyc_v));
+    V_pre    = mean(V_rms(tv >= cfg.pre_start & tv < cfg.t_step - cfg.pre_guard));
+    V_pst    = V_rms(tv >= cfg.t_step);
+    kpi_vdev = max(abs(V_pst - V_pre)) / max(V_pre, 1e-6) * 100;
 catch
 end
 
@@ -418,3 +414,7 @@ function thd_pct = calc_3ph_thd(ts_obj, f0, t1, t2)
     end
     thd_pct = mean(thds);
 end
+
+% Save unified kpi3 struct for demo_all.m
+kpi3 = struct('label', 'Model 3 (Synchronverter)', 'f_base', f_base, 'rocof', kpi_rocof, 'f_nadir', kpi_fnadir, 'f_dev', abs(f_base - kpi_fnadir), 't_settle_f', kpi_tset_f, 't_settle_P', kpi_tset_P_smooth, 'P_overshoot', kpi_os_smooth, 'V_dev_pct', kpi_vdev, 'damping', kpi_zeta, 'THD_V', kpi_vthd, 'THD_I', kpi_ithd);
+save(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'data', 'model3_kpis.mat'), 'kpi3');

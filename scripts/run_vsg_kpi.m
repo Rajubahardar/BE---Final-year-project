@@ -230,7 +230,21 @@ for c = 1:size(cases, 1)
     results(c).Delta_f_ss  = Delta_f_ss;
     results(c).V_pcc_min   = V_pcc_min;
     results(c).V_pcc_max   = V_pcc_max;
-    results(c).P_peak_MW   = P_peak_MW;
+    results(c).P_peak_MW       = P_peak_MW;
+    P_pre_MW  = mean(P_mw(t_vi >= 45.0 & t_vi <= 49.5));
+    P_ss_MW   = mean(P_mw(t_vi >= 100.0));
+    dP_vsg    = abs(P_ss_MW - P_pre_MW);
+    if dP_vsg > 1e-4, P_ov_pct = max(0, ((P_peak_MW - P_ss_MW) / dP_vsg) * 100); tol_P = 0.02 * dP_vsg; else, P_ov_pct = 0; tol_P = 0.01; end
+    P_post_v  = P_mw(t_vi >= t_step); t_vi_post = t_vi(t_vi >= t_step);
+    out_P     = find(abs(P_post_v - P_ss_MW) > tol_P, 1, 'last');
+    if isempty(out_P), t_settle_P = 0; else, t_settle_P = t_vi_post(out_P) - t_step; end
+    y_osc_v   = P_post_v - P_ss_MW;
+    pk_i      = find(y_osc_v(2:end-1) > y_osc_v(1:end-2) & y_osc_v(2:end-1) >= y_osc_v(3:end)) + 1;
+    pk_v      = y_osc_v(pk_i); pk_v = pk_v(pk_v > 1e-3);
+    if numel(pk_v) >= 2 && pk_v(1) > pk_v(2), dl = log(pk_v(1)/pk_v(2)); z_vsg = dl/sqrt(4*pi^2 + dl^2); else, z_vsg = 1.0000; end
+    results(c).P_overshoot_pct = P_ov_pct;
+    results(c).t_settle_P      = t_settle_P;
+    results(c).damping_zeta    = z_vsg;
     results(c).THD_V_pct   = THD_V_pct;
     results(c).THD_I_pct   = THD_I_pct;
 
@@ -239,9 +253,9 @@ for c = 1:size(cases, 1)
 end
 
 %% 6. SAVE & DISPLAY COMPLETE VSG KPI TABLE
-save('vsg_kpis.mat', 'results');
+save(fullfile(fileparts(fileparts(mfilename('fullpath'))), 'data', 'vsg_kpis.mat'), 'results');
 T_vsg = struct2table(results);
-writetable(T_vsg, 'vsg_kpi_summary.csv');
+writetable(T_vsg, fullfile(fileparts(fileparts(mfilename('fullpath'))), 'data', 'vsg_kpi_summary.csv'));
 
 fprintf('\n=== FINAL CRITICALLY DAMPED VSG KPI SUMMARY TABLE ===\n');
 disp(T_vsg);
