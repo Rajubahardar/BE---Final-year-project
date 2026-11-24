@@ -15,15 +15,18 @@ matlab -batch "demo_all"
 
 ## Visual Performance Comparison Across All 4 Models
 
-### 1. Unified 4-Model 6-KPI Comparison
-![All Models Comparison](results/all_models_comparison.png)
+### 1. Complete 10-KPI + Baseline Comparison Dashboard (All 4 Models)
+![All Models Complete 10-KPI Comparison](results/all_models_comparison.png)
 
-### 2. Model 0 (IEEE 9-Bus Base Case) & Model 1 (GFL Baseline) 110 s Responses
+### 2. Normalized 10-KPI Trade-off Profile & IEEE 519 Harmonic Compliance
+![Normalized 10-KPI and IEEE 519 Harmonics](results/all_10_kpis_normalized.png)
+
+### 3. Model 0 (IEEE 9-Bus Base Case) & Model 1 (GFL Baseline) 110 s Responses
 ![Model 0 Response](results/model0_response.png)
 
 ![Model 1 Response](results/model1_response.png)
 
-### 3. VSG Sensitivity, Theoretical Droop Verification & IEEE 519 Harmonics
+### 4. VSG Sensitivity, Theoretical Droop Verification & IEEE 519 Harmonics
 ![VSG Theory and Harmonics](results/vsg_theory_and_harmonics.png)
 
 ---
