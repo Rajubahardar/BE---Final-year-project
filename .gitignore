@@ -5,3 +5,19 @@ slprj/
 *.slxc
 tmpdb_*.sqlite
 *.asv
+
+# MATLAB / Simulink caches
+slprj/
+*.slxc
+*.autosave
+*.mexw64
+
+# Python & temporary archives
+__pycache__/
+*.py[cod]
+*.zip
+.env
+
+# Oversized raw figure exports (optimized JPEGs are tracked)
+paper_orchestra_input/figures/*.png
+paper_orchestra_output/figures/*.png

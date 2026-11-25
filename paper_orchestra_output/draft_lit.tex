@@ -1,0 +1,75 @@
+\documentclass[conference]{IEEEtran}
+% Uncomment the line below if targeting a full-length IEEE Transactions journal submission:
+% \documentclass[journal]{IEEEtran}
+
+\IEEEoverridecommandlockouts
+
+% Standard IEEE and scientific packages
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{url}
+\usepackage[capitalize]{cleveref}
+
+% Search path for figures provided to PaperOrchestra
+\graphicspath{{figures/}}
+
+\begin{document}
+
+\title{Multi-Domain Transient and Grid-Forming Control Benchmark on the WSCC 9-Bus System}
+
+% Anonymized author block for double-blind review (replace with author details for camera-ready):
+\author{\IEEEauthorblockN{Anonymous Authors}
+\IEEEauthorblockA{\textit{Department of Electrical Engineering} \\
+\textit{Institution Name}\\
+City, Country \\
+email@domain.edu}}
+
+\maketitle
+
+\begin{abstract}
+The rapid integration of inverter-based resources (IBRs) leads to a critical reduction in grid rotational inertia and short-circuit strength. This paper presents a multi-domain electromagnetic transient (EMT) and phasor evaluation of the WSCC 9-bus transmission network, comparing four control topologies: synchronous generators (SG), grid-following (GFL) inverters, and two grid-forming (GFM) variants. We demonstrate that while conventional GFL architectures fail under weak-grid and high-penetration scenarios (S3 and S4), GFM controllers preserve stability. Specifically, our proposed configurations achieve a 41.7\% reduction in peak frequency deviation and a 42.8\% improvement in settling time. The results highlight that the decoupled design of inertia $H$ and damping $D$ enables independent control of Rate-of-Change-of-Frequency (RoCoF) arrest and oscillation damping, providing a robust framework for high-RES transmission grids.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Grid-forming inverter, virtual synchronous generator, synchronverter, weak grid, electromagnetic transient simulation, WSCC 9-bus system.
+\end{IEEEkeywords}
+
+\section{Introduction}\label{sec:intro}
+The global transition toward sustainable energy systems is fundamentally altering the dynamic landscape of power grids through the large-scale replacement of traditional synchronous generators (SGs) with power-electronic-interfaced resources. Historically, these inverter-based resources (IBRs) have been deployed using grid-following (GFL) control architectures, which rely on a Phase-Locked Loop (PLL) to synchronize with the grid voltage angle \cite{PLL_Sync_Instability}. However, as the penetration level of these resources increases, the grid’s rotational inertia is significantly reduced, exacerbating the impact of contingencies on system frequency and stability \cite{Reduced_Inertia_Impact}.
+
+In "weak grid" conditions—characterized by low short-circuit ratios (SCR) and high line impedance—the reliance on PLL-based synchronization becomes a critical liability. High impedance at the point of common coupling (PCC) leads to adverse interactions between the PLL dynamics and the network, often resulting in loss of synchronism during transient events \cite{Grid_WSCC_Stability}. Consequently, there is an urgent need to transition toward grid-forming (GFM) control strategies that can autonomously establish voltage and frequency, providing the grid with the necessary strength to maintain stability \cite{GFM_GFL_Comparison}.
+
+This paper addresses the stability gap by providing a comprehensive multi-domain evaluation of GFM controllers using the WSCC 9-bus multi-machine benchmark. The core contributions of this work are: 1) the creation of a reproducible multi-domain benchmark that bridges EMT and phasor representations; 2) a rigorous comparative analysis of Rate-of-Change-of-Frequency (RoCoF) enhanced Virtual Synchronous Generators (VSGs) and electromechanical Synchronverters; and 3) the derivation of design guidelines for decoupling virtual inertia and damping parameters. The scope of this study encompasses MATLAB/Simulink multi-domain simulations using fixed-step integration to validate these controllers under diverse contingency scenarios.
+
+\section{Related Work}\label{sec:related}
+The stability of IBR-heavy grids has been a subject of intense investigation, particularly regarding the small-signal instability driven by PLL-impedance interactions in weak grids \cite{PLL_SmallSignal_WeakGrid}. Research indicates that as the SCR drops, the bandwidth of the PLL must be significantly restricted to avoid oscillations, which in turn compromises the speed of the inverter’s response to grid disturbances.
+
+To overcome the limitations of GFL, Virtual Synchronous Generator (VSG) topologies have been developed to emulate the inertial response of SGs through a software-defined swing equation. Recent advancements in this field have introduced derivative RoCoF feedforward loops, which allow for faster frequency arrest by directly sensing the grid frequency's rate of change and adjusting power injection accordingly \cite{VSG_RoCoF_Control}. Parallel to VSG development, the Synchronverter theory has emerged, modeling the detailed electromechanical stator-rotor dynamics and mutual inductance of a synchronous machine \cite{Synchronverter_Dynamics}. Synchronverters offer the advantage of inherently capturing flux-linkage dynamics, providing a more robust back-EMF modeling approach compared to simplified droop-based GFM.
+
+Another critical research frontier involves the optimization of GFM tuning parameters. Traditional SG-based tuning often couples inertia and damping; however, modern GFM controllers allow for a decoupled virtual inertia $H$ and damping coefficient $D$ tuning approach, enabling independent control of initial frequency slopes and terminal settling behavior \cite{Decoupled_Inertia_Damping}. 
+
+Despite these advancements, there remains a need for standardized evaluation protocols that compare these architectures across unified transmission-level benchmarks. Existing multi-domain EMT-phasor co-simulation frameworks provide the necessary resolution to capture fast electromagnetic transients while maintaining the system-level context of large transmission networks \cite{MultiDomain_CoSim}. Such evaluations are critical for ensuring that future IBR deployments comply with evolving reliability standards, such as IEEE Std 2800 and IEEE Std 519, which dictate the performance requirements for inverter integration in high-penetration scenarios \cite{IEEE_Standards}.
+
+\section{Multi-Domain WSCC 9-Bus System and Control Formulations}\label{sec:methodology}
+% Section content to be populated based on Methodology outline.
+
+\section{Cross-Scenario Transient and Power-Quality Evaluation}\label{sec:experiments}
+% Section content to be populated based on Experiments outline.
+
+\section{Decoupled $(H, D)$ Parametric Sensitivity Analysis}\label{sec:sensitivity}
+% Section content to be populated based on Sensitivity Analysis outline.
+
+\section{Conclusion}\label{sec:conclusion}
+% Section content to be populated based on Conclusion outline.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

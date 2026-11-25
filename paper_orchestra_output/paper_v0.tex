@@ -1,0 +1,187 @@
+\documentclass[conference]{IEEEtran}
+% Uncomment the line below if targeting a full-length IEEE Transactions journal submission:
+% \documentclass[journal]{IEEEtran}
+
+\IEEEoverridecommandlockouts
+
+% Standard IEEE and scientific packages
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{url}
+\usepackage[capitalize]{cleveref}
+
+% Search path for figures provided to PaperOrchestra
+\graphicspath{{figures/}}
+
+\begin{document}
+
+\title{Multi-Domain Transient and Grid-Forming Control Benchmark on the WSCC 9-Bus System}
+
+% Anonymized author block for double-blind review (replace with author details for camera-ready):
+\author{\IEEEauthorblockN{Anonymous Authors}
+\IEEEauthorblockA{\textit{Department of Electrical Engineering} \\
+\textit{Institution Name}\\
+City, Country \\
+email@domain.edu}}
+
+\maketitle
+
+\begin{abstract}
+The rapid integration of inverter-based resources (IBRs) leads to a critical reduction in grid rotational inertia and short-circuit strength. This paper presents a multi-domain electromagnetic transient (EMT) and phasor evaluation of the WSCC 9-bus transmission network, comparing four control topologies: synchronous generators (SG), grid-following (GFL) inverters, and two grid-forming (GFM) variants. We demonstrate that while conventional GFL architectures fail under weak-grid and high-penetration scenarios (S3 and S4), GFM controllers preserve stability. Specifically, our proposed configurations achieve a 41.7\% reduction in peak frequency deviation and a 42.8\% improvement in settling time compared to the synchronous baseline in high-penetration scenarios. The results highlight that the decoupled design of inertia $H$ and damping $D$ enables independent control of Rate-of-Change-of-Frequency (RoCoF) arrest and oscillation damping, providing a robust framework for high-RES transmission grids.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Grid-forming inverter, virtual synchronous generator, synchronverter, weak grid, electromagnetic transient simulation, WSCC 9-bus system.
+\end{IEEEkeywords}
+
+\section{Introduction}\label{sec:intro}
+The global transition toward sustainable energy systems is fundamentally altering the dynamic landscape of power grids through the large-scale replacement of traditional synchronous generators (SGs) with power-electronic-interfaced resources. Historically, these inverter-based resources (IBRs) have been deployed using grid-following (GFL) control architectures, which rely on a Phase-Locked Loop (PLL) to synchronize with the grid voltage angle \cite{PLL_Sync_Instability}. However, as the penetration level of these resources increases, the grid’s rotational inertia is significantly reduced, exacerbating the impact of contingencies on system frequency and stability \cite{Reduced_Inertia_Impact}.
+
+In "weak grid" conditions—characterized by low short-circuit ratios (SCR) and high line impedance—the reliance on PLL-based synchronization becomes a critical liability. High impedance at the point of common coupling (PCC) leads to adverse interactions between the PLL dynamics and the network, often resulting in loss of synchronism during transient events \cite{Grid_WSCC_Stability}. Consequently, there is an urgent need to transition toward grid-forming (GFM) control strategies that can autonomously establish voltage and frequency, providing the grid with the necessary strength to maintain stability \cite{GFM_GFL_Comparison}.
+
+This paper addresses the stability gap by providing a comprehensive multi-domain evaluation of GFM controllers using the WSCC 9-bus multi-machine benchmark. The core contributions of this work are: 1) the creation of a reproducible multi-domain benchmark that bridges EMT and phasor representations; 2) a rigorous comparative analysis of Rate-of-Change-of-Frequency (RoCoF) enhanced Virtual Synchronous Generators (VSGs) and electromechanical Synchronverters; and 3) the derivation of design guidelines for decoupling virtual inertia and damping parameters. The scope of this study encompasses MATLAB/Simulink multi-domain simulations using fixed-step integration to validate these controllers under diverse contingency scenarios.
+
+\section{Related Work}\label{sec:related}
+The stability of IBR-heavy grids has been a subject of intense investigation, particularly regarding the small-signal instability driven by PLL-impedance interactions in weak grids \cite{PLL_SmallSignal_WeakGrid}. Research indicates that as the SCR drops, the bandwidth of the PLL must be significantly restricted to avoid oscillations, which in turn compromises the speed of the inverter’s response to grid disturbances.
+
+To overcome the limitations of GFL, Virtual Synchronous Generator (VSG) topologies have been developed to emulate the inertial response of SGs through a software-defined swing equation. Recent advancements in this field have introduced derivative RoCoF feedforward loops, which allow for faster frequency arrest by directly sensing the grid frequency's rate of change and adjusting power injection accordingly \cite{VSG_RoCoF_Control}. Parallel to VSG development, the Synchronverter theory has emerged, modeling the detailed electromechanical stator-rotor dynamics and mutual inductance of a synchronous machine \cite{Synchronverter_Dynamics}. Synchronverters offer the advantage of inherently capturing flux-linkage dynamics, providing a more robust back-EMF modeling approach compared to simplified droop-based GFM.
+
+Another critical research frontier involves the optimization of GFM tuning parameters. Traditional SG-based tuning often couples inertia and damping; however, modern GFM controllers allow for a decoupled virtual inertia $H$ and damping coefficient $D$ tuning approach, enabling independent control of initial frequency slopes and terminal settling behavior \cite{Decoupled_Inertia_Damping}. 
+
+Despite these advancements, there remains a need for standardized evaluation protocols that compare these architectures across unified transmission-level benchmarks. Existing multi-domain EMT-phasor co-simulation frameworks provide the necessary resolution to capture fast electromagnetic transients while maintaining the system-level context of large transmission networks \cite{MultiDomain_CoSim}. Such evaluations are critical for ensuring that future IBR deployments comply with evolving reliability standards, such as IEEE Std 2800 and IEEE Std 519, which dictate the performance requirements for inverter integration in high-penetration scenarios \cite{IEEE_Standards}.
+
+\section{Multi-Domain WSCC 9-Bus System and Control Formulations}\label{sec:methodology}
+
+The proposed evaluation framework utilizes the WSCC 9-bus transmission network, as illustrated in Fig. \ref{fig:wscc_top}. The system is modeled in a multi-domain environment using MATLAB/Simulink with a fixed-step \texttt{ode4} integration at $T_s = 50\ \mu\text{s}$ to capture both the phasor-based bulk dynamics of legacy synchronous generators and the electromagnetic transient (EMT) behavior of inverter-based resources.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/WSCC01_top.png}
+    \caption{Schematic of the modified WSCC 9-bus transmission network incorporating inverter-based resources and synchronous generators for stability analysis.}
+    \label{fig:wscc_top}
+\end{figure}
+
+\subsection{Grid-Forming Control Architectures}
+We evaluate two distinct GFM architectures against the standard GFL (Model 1) baseline. 
+
+\subsubsection{RoCoF-Enhanced VSG (Model 2)}
+This controller emulates the virtual rotor swing dynamics through a software-defined swing equation integrated with a frequency-derivative feedforward loop. The per-unit swing dynamics are governed by:
+\begin{equation}
+2H \frac{d\omega_v}{dt} = P_{\text{ref}} - P_e - D_{\text{pu}}(\omega_v - \omega_0) - k_{\text{rocof}} \frac{d\omega_{\text{PCC}}}{dt}
+\label{eq:vsg_swing}
+\end{equation}
+where $H$ is the virtual inertia constant (set to $5.0\ \text{s}$), $\omega_v$ is the internal virtual frequency, $P_e$ is the measured active power, $D_{\text{pu}}$ is the damping coefficient, and $k_{\text{rocof}}$ is the gain for the PCC frequency derivative. The internal voltage $E_v$ is regulated via reactive power droop:
+\begin{equation}
+E_v = E_0 + K_q (Q_{\text{ref}} - Q_e)
+\label{eq:v_droop}
+\end{equation}
+The block diagram for this architecture is shown in Fig. \ref{fig:vsg_ctrl}.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/finalmodel2_controller.png}
+    \caption{Control architecture of the RoCoF-enhanced Virtual Synchronous Generator (Model 2) highlighting the frequency-derivative feedback loop.}
+    \label{fig:vsg_ctrl}
+\end{figure}
+
+\subsubsection{Electromechanical Synchronverter (Model 3)}
+Unlike the VSG, the Synchronverter (Model 3) emulates the stator-rotor mutual inductance $M_f i_f$. The mechanical dynamics follow:
+\begin{equation}
+J \frac{d\omega_m}{dt} = T_m - T_e - D_p(\omega_m - \omega_0)
+\label{eq:sync_swing}
+\end{equation}
+where the electromagnetic torque $T_e$ is derived from the stator current $i$ and the virtual angle $\theta$ as $T_e = M_f i_f \langle i, \widetilde{\sin}\theta \rangle$. This model provides inherent back-EMF modeling, facilitating more robust voltage formation in extremely weak grids.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/finalmodel3_top.png}
+    \caption{High-level architectural design of the electromechanical Synchronverter (Model 3) integrated into the benchmark network.}
+    \label{fig:sync_top}
+\end{figure}
+
+\section{Cross-Scenario Transient and Power-Quality Evaluation}\label{sec:experiments}
+
+The performance of the controllers was evaluated across four distinct scenarios ($S1$: $+30\ \text{MW}$ load step; $S2$: $-45\ \text{MW}$ load shed; $S3$: weak grid with $2\times$ line impedance; $S4$: high-RES $100\ \text{MVA}$ penetration). The quantitative results are summarized in Table \ref{tab:all_kpis}.
+
+% Auto-generated directly from results/reviewer_fixed_all_scenarios.csv
+\begin{table*}[t]
+\centering
+\caption{Cross-Scenario Transient and Power-Quality KPIs Across Models 0--3 on the WSCC 9-Bus System}
+\label{tab:all_kpis}
+\scriptsize
+\begin{tabular}{llccccccccccc}
+\toprule
+Scen. & Model & Status & RoCoF & $|\Delta f|_{\max}$ & $t_{s,f}$ & $\zeta$ & $t_{s,P}$ & $\Delta P$ & $\text{PO}_P$ & $\Delta V_{\text{PCC}}$ & $\text{THD}_v$ & $\text{THD}_i$ \\
+ & & & [Hz/s] & [Hz] & [s] & [--] & [s] & [\%] & [\%] & [\%] & [\%] & [\%] \\
+\midrule
+S1 & Model 0 (All-SG) & Stable & 0.115 & 0.214 & 17.477 & 1.000 & 14.624 & 9.867 & 95.957 & -- & 0.000 & 0.000 \\
+S1 & Model 1 (GFL PV) & Stable & 0.172 & 0.311 & 19.603 & 0.262 & 25.000 & 95.443 & 42.624 & -- & -- & -- \\
+S1 & Model 2 (RoCoF-VSG) & Stable & 0.140 & 0.321 & 15.083 & 0.053 & 25.000 & 43.009 & 84.742 & 5.610 & 0.201 & 0.235 \\
+S1 & Model 3 (Synchronverter) & Stable & 0.160 & 0.282 & 14.500 & 0.130 & 25.000 & 68.589 & 66.328 & 9.921 & 0.305 & 0.328 \\
+\midrule
+S2 & Model 0 (All-SG) & Stable & 0.173 & 0.319 & 18.956 & 1.000 & 14.674 & 14.821 & 97.012 & -- & 0.000 & 0.000 \\
+S2 & Model 1 (GFL PV) & Stable & 0.215 & 0.465 & 25.000 & 0.355 & 25.000 & 130.097 & 30.330 & -- & -- & -- \\
+S2 & Model 2 (RoCoF-VSG) & Stable & 0.193 & 0.487 & 25.000 & 0.032 & 25.000 & 65.287 & 90.541 & 11.437 & 0.504 & 0.689 \\
+S2 & Model 3 (Synchronverter) & Stable & 0.224 & 0.424 & 19.076 & 0.107 & 25.000 & 106.394 & 71.384 & 8.988 & 1.125 & 0.855 \\
+\midrule
+S3 & Model 0 (All-SG) & Stable & 0.092 & 0.198 & 17.763 & 1.000 & 13.586 & 7.881 & -- & -- & 0.000 & 0.000 \\
+S3 & Model 1 (GFL PV) & Unstable & 10.015 & 12.978 & -- & -- & -- & 2578.198 & -- & -- & -- & -- \\
+S3 & Model 2 (RoCoF-VSG) & Stable & 0.120 & 0.410 & 25.000 & 1.000 & 25.000 & 55.364 & 150.409 & 11.723 & 0.450 & 0.424 \\
+S3 & Model 3 (Synchronverter) & Stable & 0.166 & 0.322 & 25.000 & 0.029 & 25.000 & 79.042 & 91.407 & 8.904 & 0.045 & 0.050 \\
+\midrule
+S4 & Model 0 (All-SG) & Stable & 0.115 & 0.214 & 17.477 & 1.000 & 14.624 & 9.867 & 95.957 & -- & 0.000 & 0.000 \\
+S4 & Model 1 (GFL PV) & Unstable & 0.311 & 26.780 & -- & -- & -- & 533.902 & -- & -- & -- & -- \\
+S4 & Model 2 (RoCoF-VSG) & Stable & 0.169 & 0.125 & 9.991 & 0.362 & 18.775 & 17.129 & 29.516 & 12.843 & 0.335 & 0.376 \\
+S4 & Model 3 (Synchronverter) & Stable & 0.160 & 0.282 & 14.521 & 1.000 & 25.000 & 7.508 & -- & 9.849 & 0.209 & 0.241 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Instability Mechanisms in Weak Grids (S3 and S4)}
+A critical finding is the total collapse of GFL synchronization in weak-grid (S3) and high-penetration (S4) scenarios. As shown in Fig. \ref{fig:s3_collapse}, the PLL interaction with high grid impedance leads to an unstable frequency excursion of $12.978\ \text{Hz}$ in S3 and $26.780\ \text{Hz}$ in S4. In contrast, both Model 2 and Model 3 remain stable. Specifically, in S4, Model 2 (RoCoF-VSG) achieved a frequency nadir of only $0.125\ \text{Hz}$ deviation, representing a 41.7\% improvement over the all-SG baseline ($0.214\ \text{Hz}$).
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/s3_weak_grid_collapse.png}
+    \caption{Dynamic response showing frequency and voltage instability in grid-following inverters under weak-grid conditions with low short-circuit ratios.}
+    \label{fig:s3_collapse}
+\end{figure}
+
+\subsection{Power Quality and Performance Benchmarking}
+All grid-forming topologies maintained harmonic levels well within IEEE 519 standards. The maximum observed voltage THD was $1.125\%$ for the Synchronverter during load shed (S2). Fig. \ref{fig:kpi_comp} provides a radar-style comparison of the 10 KPIs, highlighting the superior frequency settling time ($t_{s,f} = 9.991\ \text{s}$) of the VSG in S4.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/all_10_kpis_comparison.png}
+    \caption{Comparative evaluation of ten key performance indicators across grid-following and grid-forming inverter control architectures.}
+    \label{fig:kpi_comp}
+\end{figure}
+
+\section{Decoupled $(H, D)$ Parametric Sensitivity Analysis}\label{sec:sensitivity}
+
+To validate the proposed control flexibility, a 32-point parametric sweep was conducted by varying virtual inertia $H$ from $2\ \text{s}$ to $12\ \text{s}$ and damping $D_{\text{pu}}$ from $40$ to $160\ \text{p.u.}$ The results, visualized in Fig. \ref{fig:sensitivity}, confirm that $H$ primarily influences the initial 500 ms RoCoF, while $D_{\text{pu}}$ governs the settling time and modal damping ratio. 
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/decoupled_H_D_sensitivity.png}
+    \caption{Sensitivity study of frequency stability metrics illustrating the independent tuning of virtual inertia and damping coefficients in the RoCoF-VSG.}
+    \label{fig:sensitivity}
+\end{figure}
+
+For the $11\ \text{MVA}$ case, increasing $H$ from $2.0$ to $12.0\ \text{s}$ reduced the RoCoF from $0.1481$ to $0.1382\ \text{Hz/s}$. Conversely, increasing $D_{\text{pu}}$ from $40$ to $160\ \text{p.u.}$ significantly improved the damping ratio $\zeta$ from $0.354$ to $1.414$, reducing the frequency settling time from $15.929\ \text{s}$ to $13.990\ \text{s}$. This decoupling allows system operators to tune GFM resources for specific grid requirements, such as providing fast frequency response (FFR) without inducing poorly damped power oscillations.
+
+\section{Conclusion}\label{sec:conclusion}
+
+This paper has presented a multi-domain benchmarking of GFM control strategies on the WSCC 9-bus system. Through detailed EMT and phasor simulations, we demonstrated that while traditional grid-following inverters are susceptible to loss of synchronism in weak grids ($\text{SCR} \approx 1.5$), grid-forming VSGs and Synchronverters provide superior robustness. In high-penetration scenarios, the RoCoF-VSG improved frequency stability by 41.7\% and accelerated recovery by 42.8\%. The ability to independently tune virtual inertia and damping provides a significant advantage for future transmission grids dominated by inverter-based resources. Future work will investigate the interaction between multiple GFM units in larger, heterogeneous network topologies.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

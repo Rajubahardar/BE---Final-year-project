@@ -1,0 +1,11 @@
+{
+  "WSCC01_top.png": "Schematic of the modified WSCC 9-bus transmission network incorporating inverter-based resources and synchronous generators for stability analysis.",
+  "all_10_kpis_comparison.png": "Comparative evaluation of ten key performance indicators across grid-following and grid-forming inverter control architectures.",
+  "decoupled_H_D_sensitivity.png": "Sensitivity study of frequency stability metrics illustrating the independent tuning of virtual inertia and damping coefficients in the RoCoF-VSG.",
+  "finalmodel1_top.png": "Top-level block diagram of the conventional grid-following inverter (Model 1) utilizing phase-locked loop synchronization.",
+  "finalmodel2_controller.png": "Control architecture of the RoCoF-enhanced Virtual Synchronous Generator (Model 2) highlighting the frequency-derivative feedback loop.",
+  "finalmodel2_top.png": "System-level implementation of the RoCoF-VSG grid-forming inverter within the MATLAB/Simulink environment.",
+  "finalmodel3_top.png": "High-level architectural design of the electromechanical Synchronverter (Model 3) integrated into the benchmark network.",
+  "multi_scenario_benchmark.png": "Performance benchmarking of frequency nadir and settling time across various contingencies and grid-strength scenarios.",
+  "s3_weak_grid_collapse.png": "Dynamic response showing frequency and voltage instability in grid-following inverters under weak-grid conditions with low short-circuit ratios."
+}

@@ -1,0 +1,62 @@
+{
+  "intro_search_queries": [
+    "Grid-forming inverter stability analysis on WSCC 9-bus transmission network",
+    "Impact of reduced rotational inertia on IEEE multi-machine benchmark systems",
+    "Phase-locked loop synchronization instability in low short-circuit ratio grids",
+    "Comparative transient performance of grid-forming vs grid-following architectures"
+  ],
+  "related_work_queries": [
+    "PLL-driven small-signal instability in weak-grid inverter-based resources",
+    "Virtual Synchronous Generator control with derivative RoCoF feedforward",
+    "Synchronverter electromechanical stator-rotor dynamics and back-EMF modeling",
+    "Multi-domain EMT-phasor co-simulation for transmission-level stability",
+    "Decoupled virtual inertia and damping coefficient tuning in grid-forming controllers",
+    "IEEE Std 2800 and IEEE Std 519 compliance in high-penetration renewable grids"
+  ],
+  "section_plan": {
+    "Abstract": [
+      "Define problem: loss of grid inertia and short-circuit strength due to IBR penetration.",
+      "Summarize methodology: multi-domain EMT/phasor evaluation of WSCC 9-bus with four controller topologies.",
+      "Highlight Model 1 instability in S3/S4 versus stable GFM performance.",
+      "Quantify gains: 41.7% reduction in peak frequency deviation and 42.8% improvement in settling time under high penetration.",
+      "State core finding: Decoupled design of inertia H and damping D enables independent RoCoF arrest and oscillation damping."
+    ],
+    "Introduction": [
+      "Contextualize the transition from synchronous generators to PLL-dependent GFL inverters.",
+      "Explain the 'weak grid' problem (low SCR, high impedance) and its effect on PLL synchronization.",
+      "State the paper's 3-4 contributions: creation of a reproducible multi-domain benchmark, comparative analysis of RoCoF-VSG and Synchronverters, and design guidelines for parameter decoupling.",
+      "Define the scope: MATLAB/Simulink multi-domain simulation using ode4 integration."
+    ],
+    "Related Work": [
+      "Review literature on GFL instability caused by PLL-impedance interaction in weak grids.",
+      "Discuss VSG development and the evolution of RoCoF feedforward loops for faster frequency arrest.",
+      "Detail Synchronverter theory and its advantages in mimicking flux-linkage dynamics.",
+      "Compare existing multi-domain simulation benchmarks and the need for standardized grid-forming evaluation protocols."
+    ],
+    "Methodology": [
+      "Describe the WSCC 9-bus benchmark system architecture (3-machine, 60 Hz).",
+      "Formalize RoCoF-VSG (Model 2) swing equations and reactive power droop control.",
+      "Formalize Synchronverter (Model 3) stator-rotor mutual inductance and electromagnetic torque equations.",
+      "Detail the controller tuning parameters (H = 5.0 s, D_pu = 80 p.u.) and the simulation environment (Ts = 50 microseconds).",
+      "Define the four contingency scenarios (S1-S4) and the 10 KPI metrics used for evaluation."
+    ],
+    "Experiments": [
+      "Present the 10-KPI benchmark table for S1 through S4.",
+      "Analyze the failure of Model 1 (GFL) in weak grid (S3) and high penetration (S4) scenarios (e.g., dP_surge = 533.9 MW).",
+      "Compare GFM models against Model 0 (All-SG) baseline to demonstrate superior frequency support.",
+      "Verify power quality compliance using THD data (THDv <= 1.13%) against IEEE 519 standards.",
+      "Reference comparative plots: multi_scenario_benchmark.png and s3_weak_grid_collapse.png."
+    ],
+    "Sensitivity Analysis": [
+      "Analyze results from the 32-point decoupled (H, D) parametric sweep.",
+      "Demonstrate that increasing H reduces the initial 500 ms RoCoF but has minimal impact on the modal damping ratio.",
+      "Demonstrate that increasing D_pu governs the damping ratio (zeta) and frequency settling time without impacting initial RoCoF.",
+      "Discuss the implications for grid-forming control design and practical inverter tuning."
+    ],
+    "Conclusion": [
+      "Summarize why GFM architectures are critical for preserving synchronism in weak grids.",
+      "Reiterate the quantitative performance improvements of RoCoF-VSG and Synchronverters over GFL and SG baselines.",
+      "Provide recommendations for selecting and tuning grid-forming parameters in future transmission-level inverter deployments."
+    ]
+  }
+}

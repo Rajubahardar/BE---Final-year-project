@@ -1,0 +1,65 @@
+\documentclass[conference]{IEEEtran}
+% Uncomment the line below if targeting a full-length IEEE Transactions journal submission:
+% \documentclass[journal]{IEEEtran}
+
+\IEEEoverridecommandlockouts
+
+% Standard IEEE and scientific packages
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{url}
+\usepackage[capitalize]{cleveref}
+
+% Search path for figures provided to PaperOrchestra
+\graphicspath{{figures/}}
+
+\begin{document}
+
+\title{Multi-Domain Transient and Grid-Forming Control Benchmark on the WSCC 9-Bus System}
+
+% Anonymized author block for double-blind review (replace with author details for camera-ready):
+\author{\IEEEauthorblockN{Anonymous Authors}
+\IEEEauthorblockA{\textit{Department of Electrical Engineering} \\
+\textit{Institution Name}\\
+City, Country \\
+email@domain.edu}}
+
+\maketitle
+
+\begin{abstract}
+% To be populated by the Section Writing Agent from idea.md and experimental_log.md.
+\end{abstract}
+
+\begin{IEEEkeywords}
+% To be populated with 4--6 IEEE index terms (e.g., Grid-forming inverter, virtual synchronous generator, synchronverter, weak grid, electromagnetic transient simulation, WSCC 9-bus system).
+\end{IEEEkeywords}
+
+\section{Introduction}\label{sec:intro}
+% To be populated by the Literature Review Agent (macro-level context, problem gap, and core contributions).
+
+\section{Related Work}\label{sec:related}
+% To be populated by the Literature Review Agent (micro-level comparison across PLL weak-grid stability, RoCoF-VSG, synchronverters, and multi-domain EMT/phasor benchmarks).
+
+\section{Multi-Domain WSCC 9-Bus System and Control Formulations}\label{sec:methodology}
+% To be populated by the Section Writing Agent (hybrid EMT/phasor architecture, Models 0--3 equations, tuned parameters, and contingency definitions S1--S4).
+
+\section{Cross-Scenario Transient and Power-Quality Evaluation}\label{sec:experiments}
+% To be populated by the Section Writing Agent (10-KPI cross-scenario table, S1--S4 transient dynamics, weak-grid GFL collapse, and IEEE 519 harmonic compliance).
+
+\section{Decoupled $(H, D)$ Parametric Sensitivity Analysis}\label{sec:sensitivity}
+% To be populated by the Section Writing Agent (32-point parametric sweep isolating virtual inertia H and damping D_pu).
+
+\section{Conclusion}\label{sec:conclusion}
+% To be populated by the Section Writing Agent (summary of findings and topology selection guidelines).
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
