@@ -1,0 +1,36 @@
+=== EXTRACTED SIMULINK MODEL PARAMETERS & CONTROL BLOCKS ===
+
+--- finalmodel2 ---
+  Gain Block: finalmodel2/
+/Gain                                      | Gain = Kq_vsg
+  Gain Block: finalmodel2/G3/Gain                                     | Gain = 60
+  Gain Block: finalmodel2/Gain                                        | Gain = 108830/1000000
+  Gain Block: finalmodel2/Gain1                                       | Gain = 1/1000
+  Gain Block: finalmodel2/Gain10                                      | Gain = 1/wn
+  Gain Block: finalmodel2/Gain2                                       | Gain = 1/1000
+  Gain Block: finalmodel2/Gain3                                       | Gain = 100
+  Gain Block: finalmodel2/Gain4                                       | Gain = L1*2*pi
+  Gain Block: finalmodel2/Gain5                                       | Gain = 1/J
+  Gain Block: finalmodel2/Gain7                                       | Gain = 108830/1000
+  Gain Block: finalmodel2/Gain8                                       | Gain = D
+  Gain Block: finalmodel2/Gain9                                       | Gain = 1/(2*pi)
+  Gain Block: finalmodel2/Normalizer                                  | Gain = 2/Vdclink
+  Gain Block: finalmodel2/Voltage and current double closed loop/Gain | Gain = Kip_vsg
+  Gain Block: finalmodel2/Voltage and current double closed loop/Gain1 | Gain = Kip_vsg
+  Gain Block: finalmodel2/Voltage and current double closed loop/WC   | Gain = Cf*2*pi
+  Gain Block: finalmodel2/Voltage and current double closed loop/WL   | Gain = Ls*2*pi
+--- finalmodel3 ---
+  Gain Block: finalmodel3/Controller/Formulas/Gain1                   | Gain = -1
+  Gain Block: finalmodel3/Controller/Gain                             | Gain = Dp
+  Gain Block: finalmodel3/Controller/Gain1                            | Gain = Dq
+  Gain Block: finalmodel3/Controller/Gain2                            | Gain = 1/Wn
+  Gain Block: finalmodel3/Controller/Gain3                            | Gain = 1/(2*pi)
+  Gain Block: finalmodel3/Controller/Gain4                            | Gain = 1/fg*100
+  Gain Block: finalmodel3/Controller/Gain5                            | Gain = Wn
+  Gain Block: finalmodel3/G3/Gain                                     | Gain = 60
+  Gain Block: finalmodel3/Gain                                        | Gain = 108830/1000000
+  Gain Block: finalmodel3/Gain1                                       | Gain = 1/1000
+  Gain Block: finalmodel3/Gain2                                       | Gain = 1/1000
+  Gain Block: finalmodel3/Gain3                                       | Gain = 100
+  Gain Block: finalmodel3/Gain7                                       | Gain = 108830/1000
+  Gain Block: finalmodel3/Normalizer                                  | Gain = 2/Vdclink

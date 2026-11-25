@@ -1,6 +1,5 @@
-﻿slprj/
-_sim_cache/
-*.slxc
-*.asv
+﻿_sim_cache/
+slprj/
 *.autosave
-backup_original_slx/
+*.mexw64
+*.slxc
