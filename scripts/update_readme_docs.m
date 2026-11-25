@@ -1,0 +1,64 @@
+%% scripts/update_readme_docs.m
+restoredefaultpath;
+rootDir = 'D:\final year project';
+cd(rootDir);
+datDir = fullfile(rootDir, 'data');
+resDir = fullfile(rootDir, 'results');
+k0 = load(fullfile(datDir, 'model0_kpis.mat'), 'kpi0').kpi0;
+k1 = load(fullfile(datDir, 'model1_kpis.mat'), 'kpi1').kpi1;
+k2 = load(fullfile(datDir, 'model2_kpis.mat'), 'k2').k2;
+k3 = load(fullfile(datDir, 'model3_kpis.mat'), 'kpi3').kpi3;
+T_scen  = readtable(fullfile(resDir, 'reviewer_fixed_all_scenarios.csv'));
+T_sweep = readtable(fullfile(resDir, 'decoupled_H_D_sensitivity.csv'));
+fid = fopen(fullfile(rootDir, 'README.md'), 'w');
+fprintf(fid, '# Comparative Transient & Grid-Forming Control Benchmark on the WSCC 9-Bus System\n\n');
+fprintf(fid, 'Deterministic EMT and Phasor benchmark comparing four converter and synchronous-machine architectures at **Bus 2 (PCC)** of the **WSCC 9-Bus (60 Hz) transmission system** across multiple grid contingencies and decoupled virtual inertia ($H$) and damping ($D$) sweeps.\n\n');
+fprintf(fid, '## Evaluated Architectures\n\n');
+fprintf(fid, '| Model | Simulink File | Control Architecture | Simulation Domain | Pre-Step Equilibrium |\n');
+fprintf(fid, '| :--- | :--- | :--- | :--- | :--- |\n');
+fprintf(fid, '| **Model 0** | `models/WSCC01.slx` | All-Synchronous-Generator Baseline (Ideal SGs, no converters) | Phasor (60 Hz) | `%.4f Hz` |\n', k0.f_base);
+fprintf(fid, '| **Model 1** | `models/finalmodel1.slx` | Grid-Following (GFL) PV Inverter with PLL | EMT ($T_s = 50\\,\\mu\\text{s}$) | `%.4f Hz` |\n', k1.f_base);
+fprintf(fid, '| **Model 2** | `models/finalmodel2.slx` | RoCoF-Compensated Virtual Synchronous Generator (VSG) | EMT ($T_s = 50\\,\\mu\\text{s}$) | `%.4f Hz` |\n', k2.f_base);
+fprintf(fid, '| **Model 3** | `models/finalmodel3.slx` | Zhong-Weiss Synchronverter (Grid-Forming) | EMT ($T_s = 50\\,\\mu\\text{s}$) | `%.4f Hz` |\n\n', k3.f_base);
+fprintf(fid, '## Quick Start (Reproduce All Tables & Figures)\n\n');
+fprintf(fid, '```bash\ngit clone [https://github.com/Rajubahardar/BE---Final-year-project.git](https://github.com/Rajubahardar/BE---Final-year-project.git)\n```\n\n');
+fprintf(fid, 'In **MATLAB R2024b** (with Simscape Electrical):\n\n');
+fprintf(fid, '```matlab\ncd(''BE---Final-year-project'');\ndemo_all;          %%%% Displays calibrated master KPI, S1-S4 scenario, and H/D sweep tables\ndemo_all(''resim''); %%%% Re-runs all Simulink EMT/Phasor models from scratch\n```\n\n');
+fprintf(fid, '## 1. Nominal Benchmark KPIs (Scenario S1: +30 MW Load Step at $t = 50.0\\,\\text{s}$)\n\n');
+fprintf(fid, '| # | Key Performance Indicator | Unit | Model 0 (All-SG) | Model 1 (GFL) | Model 2 (VSG) | Model 3 (Sync) |\n');
+fprintf(fid, '| :--- | :--- | :---: | :---: | :---: | :---: | :---: |\n');
+fprintf(fid, '| 0 | Pre-Step Frequency Baseline ($f_{\\text{pre}}$) | Hz | %.4f | %.4f | %.4f | %.4f |\n', k0.f_base, k1.f_base, k2.f_base, k3.f_base);
+fprintf(fid, '| 1 | Maximum RoCoF (500 ms sliding window at PCC) | Hz/s | %.4f | %.4f | %.4f | %.4f |\n', k0.rocof, k1.rocof, k2.rocof, k3.rocof);
+fprintf(fid, '| 2 | Frequency Nadir ($f_{\\text{nadir}}$) | Hz | %.4f | %.4f | %.4f | %.4f |\n', k0.f_nadir, k1.f_nadir, k2.f_nadir, k3.f_nadir);
+fprintf(fid, '| 3 | Max Frequency Excursion ($|\\Delta f_{\\max}| = |f_{\\text{nadir}} - f_{\\text{pre}}|$) | Hz | %.4f | %.4f | %.4f | %.4f |\n', k0.f_dev, k1.f_dev, k2.f_dev, k3.f_dev);
+fprintf(fid, '| 4 | Frequency Settling Time ($\\pm 0.02\\,\\text{Hz}$ band) | s | %.4f | %.4f | %.4f | %.4f |\n', k0.t_settle_f, k1.t_settle_f, k2.t_settle_f, k3.t_settle_f);
+fprintf(fid, '| 5 | Active-Power Settling Time ($\\pm 2%%%%$ band) | s | %.4f | %.4f | %.4f | %.4f |\n', k0.t_settle_P, k1.t_settle_P, k2.t_settle_P, k3.t_settle_P);
+fprintf(fid, '| 6a | Active-Power Overshoot (Step-Normalized, $\\text{PO}_{\\text{step}}$) | %%%% | %.2f | %.2f | %.2f | %.2f |\n', k0.P_overshoot, k1.P_overshoot, k2.P_overshoot, k3.P_overshoot);
+fprintf(fid, '| 6b | Peak Active-Power Surge (Rated-Capacity Normalized, $\\Delta P_{\\text{pu}}$) | %%%% | %.2f | %.2f | %.2f | %.2f |\n', k0.dP_surge_pu, k1.dP_surge_pu, k2.dP_surge_pu, k3.dP_surge_pu);
+fprintf(fid, '| 7 | Maximum PCC Voltage Deviation ($|\\Delta V_{\\max}|$) | %%%% | %.4f | %.4f | %.4f | %.4f |\n', k0.V_dev_pct, k1.V_dev_pct, k2.V_dev_pct, k3.V_dev_pct);
+fprintf(fid, '| 8 | Damping Ratio ($\\zeta$) | - | %.4f | %.4f | %.4f | %.4f |\n', k0.damping, k1.damping, k2.damping, k3.damping);
+fprintf(fid, '| 9 | PCC Voltage THD ($\\text{THD}_V$, harmonics 2-40) | %%%% | %.4f | %.4f | %.4f | %.4f |\n', k0.THD_V, k1.THD_V, k2.THD_V, k3.THD_V);
+fprintf(fid, '| 10 | PCC Current THD ($\\text{THD}_I$, harmonics 2-40) | %%%% | %.4f | %.4f | %.4f | %.4f |\n\n', k0.THD_I, k1.THD_I, k2.THD_I, k3.THD_I);
+fprintf(fid, '### Methodological Notes & Metric Definitions\n');
+fprintf(fid, '- **Pre-Step Calibration ($60.000\\,\\text{Hz}$):** Governor references (`G1/Pref1`) in `finalmodel2.slx` (`0.926562 pu`) and `finalmodel3.slx` (`0.898438 pu`) are calibrated so all models initialize at $60.00 \\pm 0.01\\,\\text{Hz}$ prior to $t = 50.0\\,\\text{s}$.\n');
+fprintf(fid, '- **Standardized PCC RoCoF:** Evaluated identically across all four models at the Bus 2 PCC / system frequency signal (`w`) using a 500 ms sliding window ($|\\Delta f| / 0.50\\,\\text{s}$), eliminating internal rotor filter distortion.\n');
+fprintf(fid, '- **Dual Active-Power Overshoot Definitions:** $\\text{PO}_{\\text{step}} = \\frac{|P_{\\text{peak}} - P_{\\text{ss}}|}{|P_{\\text{ss}} - P_{\\text{pre}}|} \\times 100%%%%$ normalizes against each unit''s steady-state droop share (explaining why Model 0''s inertial swing yields $89.5%%%%$ over a small $\\Delta P_{\\text{ss}}$), whereas $\\Delta P_{\\text{pu}} = \\frac{|P_{\\text{peak}} - P_{\\text{pre}}|}{S_{\\text{rated}}} \\times 100%%%%$ normalizes against device MVA rating.\n');
+fprintf(fid, '- **Deterministic Simulation & Ideal Phasor Baseline:** All models are deterministic without stochastic noise, ensuring single-run reproducibility. Model 0 reports $0.0000%%%%$ THD because it is a fundamental-frequency Phasor baseline with ideal synchronous machines and no switching converters.\n\n');
+fprintf(fid, '## 2. Multi-Scenario Contingency Benchmark (S1-S4)\n\n');
+fprintf(fid, '![Multi-Scenario Contingency Benchmark](results/multi_scenario_benchmark.png)\n\n');
+fprintf(fid, '| Scenario | Model | $f_{\\text{pre}}$ (Hz) | RoCoF (Hz/s) | $f_{\\text{ext}}$ (Hz) | $|\\Delta f_{\\max}|$ (Hz) | $\\text{PO}_{\\text{step}}$ (%%%%) | $\\Delta P_{\\text{pu}}$ (%%%%) | $\\text{THD}_V$ (%%%%) |\n');
+fprintf(fid, '| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n');
+for r = 1:height(T_scen)
+    fprintf(fid, '| %s | %s | %.4f | %.4f | %.4f | %.4f | %.2f | %.2f | %.4f |\n', T_scen.Scenario{r}, T_scen.Model{r}, T_scen.f_pre_Hz(r), T_scen.RoCoF_500ms_Hz_s(r), T_scen.f_extremum_Hz(r), T_scen.Delta_f_max_Hz(r), T_scen.PO_P_step_pct(r), T_scen.dP_surge_pu_pct(r), T_scen.THDv_pct(r));
+end
+fprintf(fid, '\n## 3. Decoupled Virtual Inertia ($H$) & Damping ($D$) Sensitivity Sweeps\n\n');
+fprintf(fid, 'To isolate parameter effects cleanly, $H \\in \\{2, 5, 8, 12\\}\\,\\text{s}$ is swept at fixed $D_{\\text{pu}} = 80\\,\\text{p.u.}$, and $D_{\\text{pu}} \\in \\{40, 80, 120, 160\\}\\,\\text{p.u.}$ is swept at fixed $H = 5.0\\,\\text{s}$ under both **11 MVA** (2.4%%%% inverter share, where synchronous generators $G_1 + G_3 = 439.5\\,\\text{MVA}$ dominate total inertia) and **100 MVA** (high-RES penetration, where virtual inertia strongly governs PCC RoCoF).\n\n');
+fprintf(fid, '![Decoupled H and D Sensitivity](results/decoupled_H_D_sensitivity.png)\n\n');
+fprintf(fid, '| Sweep | Capacity | Model | $H$ (s) | $D_{\\text{pu}}$ (p.u.) | RoCoF (Hz/s) | $f_{\\text{nadir}}$ (Hz) | $|\\Delta f_{\\max}|$ (Hz) | $t_{s,f}$ (s) | Damping ($\\zeta$) |\n');
+fprintf(fid, '| :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n');
+for r = 1:height(T_sweep)
+    fprintf(fid, '| %s | %s | %s | %.1f | %.0f | %.4f | %.4f | %.4f | %.2f | %.4f |\n', T_sweep.SweepType{r}, T_sweep.CapacityCase{r}, T_sweep.Model{r}, T_sweep.H_s(r), T_sweep.D_pu(r), T_sweep.RoCoF_500ms_Hz_s(r), T_sweep.f_nadir_Hz(r), T_sweep.Delta_f_max_Hz(r), T_sweep.ts_f_s(r), T_sweep.Damping_zeta(r));
+end
+fprintf(fid, '\n## Repository Structure\n\n```\n├── demo_all.m                              # Master entrypoint (fast table display & full re-simulation)\n├── README.md                               # Project documentation, calibrated KPI tables & figures\n├── models/                                 # Calibrated Simulink models (.slx) & workspace parameters (.mat)\n├── scripts/                                # Calibration, multi-scenario, sensitivity & doc scripts\n├── data/                                   # Saved benchmark KPI structs (model0_kpis.mat - model3_kpis.mat)\n├── results/                                # CSV benchmark tables & high-resolution PNG figures\n└── report/                                 # Technical report files\n```\n');
+fclose(fid);
+fprintf('[SUCCESS] README.md updated with all calibrated tables, equations, and figures!\n');

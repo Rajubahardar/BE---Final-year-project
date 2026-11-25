@@ -1,4 +1,6 @@
 ﻿slprj/
+_sim_cache/
 *.slxc
-*.mexw64
 *.asv
+*.autosave
+backup_original_slx/
