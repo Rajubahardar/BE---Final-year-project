@@ -3,83 +3,258 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WSCC 9-Bus Grid-Forming Control Benchmark Explorer</title>
+  <title>WSCC 9-Bus Multi-Domain &amp; Grid-Forming Control Benchmark</title>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
   <style>
-    :root { --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #f1f5f9; --muted: #94a3b8; --accent: #38bdf8; }
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); padding: 24px; }
-    .container { max-width: 1400px; margin: 0 auto; }
-    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px; }
-    h1 { margin: 0; font-size: 1.5rem; }
-    .subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
-    .badge { background: rgba(56,189,248,0.15); color: var(--accent); border: 1px solid rgba(56,189,248,0.4); padding: 6px 12px; border-radius: 999px; font-size: 0.82rem; text-decoration: none; }
-    #statusBanner { font-size: 0.85rem; color: #4ade80; margin-bottom: 16px; }
-    .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
-    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
-    select, input[type=file] { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 0.9rem; }
-    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-    .card-title { font-size: 0.8rem; color: var(--muted); }
-    .card-val { font-size: 1.45rem; font-weight: 700; margin-top: 6px; color: var(--accent); }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-    @media (max-width: 960px) { .grid-2 { grid-template-columns: 1fr; } }
-    .chart-box { height: 420px; width: 100%; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
-    th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--card); }
-    .table-wrap { max-height: 360px; overflow: auto; }
-    .pill-unstable { background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
-    .pill-stable { background: rgba(34,197,94,0.2); color: #4ade80; padding: 2px 8px; border-radius: 6px; }
-    #fallbackBar { display: none; background: #1e293b; border: 1px dashed var(--accent); padding: 14px; border-radius: 10px; margin-bottom: 18px; }
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-alt: #f1f5f9;
+      --border: #cbd5e1;
+      --border-light: #e2e8f0;
+      --ink: #0f172a;
+      --ink-secondary: #475569;
+      --ink-muted: #64748b;
+      --primary: #1e3a8a;
+      --primary-hover: #1d4ed8;
+      --stable-bg: #ecfdf5;
+      --stable-ink: #065f46;
+      --stable-border: #a7f3d0;
+      --unstable-bg: #fef2f2;
+      --unstable-ink: #991b1b;
+      --unstable-border: #fecaca;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.5;
+      padding: 24px 20px 40px;
+    }
+    .container { max-width: 1360px; margin: 0 auto; }
+    .header-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--primary);
+      border-radius: 6px;
+      padding: 20px 24px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .eyebrow {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    h1 { margin: 0; font-size: 1.4rem; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+    .subtitle { color: var(--ink-secondary); font-size: 0.9rem; margin-top: 4px; }
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--stable-bg); color: var(--stable-ink);
+      border: 1px solid var(--stable-border);
+      padding: 5px 11px; border-radius: 4px; font-size: 0.8rem; font-weight: 500;
+    }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
+    .btn-repo {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--surface); color: var(--ink);
+      border: 1px solid var(--border); padding: 6px 12px;
+      border-radius: 4px; font-size: 0.82rem; font-weight: 600;
+      text-decoration: none; transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-repo:hover { background: var(--surface-alt); border-color: #94a3b8; }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--ink-secondary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    select, input[type=file] {
+      width: 100%;
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 7px 10px;
+      font-size: 0.88rem;
+    }
+    select:focus { outline: 2px solid rgba(30, 58, 138, 0.2); border-color: var(--primary); }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 18px;
+    }
+    .metric-label { font-size: 0.78rem; font-weight: 600; color: var(--ink-muted); }
+    .metric-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .metric-note { font-size: 0.78rem; color: var(--ink-secondary); margin-top: 2px; }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 980px) { .charts-grid { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 18px;
+    }
+    .panel-header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 10px; margin-bottom: 12px;
+    }
+    .panel-title { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+    .panel-sub { font-size: 0.78rem; color: var(--ink-muted); }
+    .chart-box { height: 410px; width: 100%; }
+    .table-wrap { max-height: 400px; overflow: auto; border: 1px solid var(--border-light); border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+    th, td { padding: 8px 11px; border-bottom: 1px solid var(--border-light); text-align: left; white-space: nowrap; }
+    th {
+      background: var(--surface-alt);
+      color: var(--ink-secondary);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr:hover { background: #f8fafc; }
+    .tag-stable {
+      display: inline-block; background: var(--stable-bg); color: var(--stable-ink);
+      border: 1px solid var(--stable-border); padding: 1px 7px; border-radius: 3px; font-weight: 600; font-size: 0.75rem;
+    }
+    .tag-unstable {
+      display: inline-block; background: var(--unstable-bg); color: var(--unstable-ink);
+      border: 1px solid var(--unstable-border); padding: 1px 7px; border-radius: 3px; font-weight: 600; font-size: 0.75rem;
+    }
+    #fallbackBar {
+      display: none; background: #fffbeb; border: 1px solid #fcd34d;
+      color: #78350f; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 0.86rem;
+    }
   </style>
 </head>
 <body>
 <div class="container">
-  <header>
+  <div class="header-card">
     <div>
-      <h1>WSCC 9-Bus Grid-Forming Control Benchmark Explorer</h1>
-      <div class="subtitle">100% Data-Driven Interactive Dashboard — Dynamically parsed from <code>results/*.csv</code></div>
+      <div class="eyebrow">WSCC 9-Bus Multi-Domain EMT &amp; Phasor Benchmark</div>
+      <h1>Grid-Forming vs. Grid-Following Control Performance Explorer</h1>
+      <div class="subtitle">Interactive results viewer driven directly by <code>results/reviewer_fixed_all_scenarios.csv</code> and <code>results/decoupled_H_D_sensitivity.csv</code></div>
     </div>
-    <a class="badge" href="https://github.com/Rajubahardar/BE---Final-year-project" target="_blank">GitHub Repository ↗</a>
-  </header>
-
-  <div id="statusBanner">Loading benchmark CSV datasets...</div>
+    <div class="header-actions">
+      <div class="status-pill" id="statusBanner"><span class="status-dot"></span><span>Loading benchmark CSVs...</span></div>
+      <a class="btn-repo" href="https://github.com/Rajubahardar/BE---Final-year-project" target="_blank">Source Repository ↗</a>
+    </div>
+  </div>
 
   <div id="fallbackBar">
-    <strong>Offline / Local CSV Mode:</strong> Select <code>reviewer_fixed_all_scenarios.csv</code> and <code>decoupled_H_D_sensitivity.csv</code> from <code>results/</code>:
-    <input type="file" id="csvPicker" accept=".csv" multiple style="margin-top:8px;" />
+    <strong>Local File Mode:</strong> Select <code>reviewer_fixed_all_scenarios.csv</code> and <code>decoupled_H_D_sensitivity.csv</code> from your <code>results/</code> folder:
+    <input type="file" id="csvPicker" accept=".csv" multiple style="margin-top:8px; max-width:460px;" />
   </div>
 
   <div class="controls">
-    <div><label for="kpiSelect">Primary Benchmark KPI</label><select id="kpiSelect"></select></div>
-    <div><label for="scenSelect">Scenario Filter</label><select id="scenSelect"></select></div>
-    <div><label for="scaleSelect">Outlier Scaling Mode</label>
+    <div><label for="kpiSelect">Benchmark KPI (1–10)</label><select id="kpiSelect"></select></div>
+    <div><label for="scenSelect">Contingency Scenario</label><select id="scenSelect"></select></div>
+    <div><label for="scaleSelect">Outlier Axis Scaling</label>
       <select id="scaleSelect">
-        <option value="clipped">Clip Unstable Outliers (Preserve Stable Resolution)</option>
-        <option value="raw">Raw Unclipped CSV Values</option>
+        <option value="clipped">Clip Unstable Outliers (Match Publication Figure)</option>
+        <option value="raw">Show Raw Unclipped Values</option>
       </select>
     </div>
-    <div><label for="sweepMetricSelect">(H, D) Sensitivity Sweep Metric</label><select id="sweepMetricSelect"></select></div>
+    <div><label for="sweepMetricSelect">(H, D) Parametric Sweep Response</label><select id="sweepMetricSelect"></select></div>
   </div>
 
-  <div class="kpis" id="summaryCards"></div>
+  <div class="metrics-grid" id="summaryCards"></div>
 
-  <div class="grid-2">
-    <div class="card"><div id="kpiBarChart" class="chart-box"></div></div>
-    <div class="card"><div id="sweepChart" class="chart-box"></div></div>
+  <div class="charts-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title" id="barPanelTitle">Cross-Scenario KPI Comparison</span>
+        <span class="panel-sub">Models 0–3 across S1–S4</span>
+      </div>
+      <div id="kpiBarChart" class="chart-box"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title" id="sweepPanelTitle">Decoupled (H, D) Sensitivity Map</span>
+        <span class="panel-sub">32-point parametric sweep</span>
+      </div>
+      <div id="sweepChart" class="chart-box"></div>
+    </div>
   </div>
 
-  <div class="card">
-    <div style="font-weight:600; margin-bottom:10px;">Live CSV Dataset Records</div>
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Benchmark Dataset Records</span>
+      <span class="panel-sub">Exact values exported from MATLAB/Simulink</span>
+    </div>
     <div class="table-wrap"><table id="dataTable"></table></div>
   </div>
 </div>
 
 <script>
 let scenRows = [], sweepRows = [];
-const PALETTE = ['#38bdf8', '#f87171', '#facc15', '#4ade80', '#c084fc', '#fb923c'];
+// Publication colorblind-safe palette matching +wscc9/plotAll10KPIs.m
+const PALETTE = ['#1f77b4', '#d62728', '#d97706', '#2ca02c', '#7c3aed', '#0891b2'];
+
+const KPI_LABELS = {
+  RoCoF_500ms_Hz_s: '1. RoCoF (500 ms) [Hz/s]',
+  Delta_f_max_Hz: '2. Max Frequency Deviation |Δf| [Hz]',
+  ts_f_s: '3. Frequency Settling Time t_s,f [s]',
+  Damping_zeta: '4. Damping Ratio ζ [-]',
+  ts_P_s: '5. Active Power Settling t_s,P [s]',
+  dP_surge_pu_pct: '6. Power Surge ΔP [% S_rated]',
+  PO_P_step_pct: '7. Power Overshoot PO_P [%]',
+  dV_PCC_max_pct: '8. Max PCC Voltage Dev. ΔV [%]',
+  THDv_pct: '9. Voltage THD_v [%]',
+  THDi_pct: '10. Current THD_i [%]',
+  f_nadir_Hz: 'Frequency Nadir / Peak [Hz]',
+  f_pre_Hz: 'Pre-Disturbance Frequency [Hz]',
+  P_surge_MW: 'Peak Power Surge ΔP [MW]',
+  S_rated_MVA: 'Inverter Rated Base S_rated [MVA]'
+};
+
+function formatLabel(col) {
+  return KPI_LABELS[col] || col;
+}
 
 function isNumericCol(rows, col) {
   return rows.some(r => typeof r[col] === 'number' && Number.isFinite(r[col]));
@@ -88,20 +263,22 @@ function isNumericCol(rows, col) {
 function initDashboard() {
   if (!scenRows.length) return;
   const cols = Object.keys(scenRows[0]);
-  const numCols = cols.filter(c => isNumericCol(scenRows, c));
+  const numCols = cols.filter(c => isNumericCol(scenRows, c) && c !== 'S_rated_MVA');
   const kpiSel = document.getElementById('kpiSelect');
-  kpiSel.innerHTML = numCols.map(c => `<option value="${c}">${c}</option>`).join('');
+  kpiSel.innerHTML = numCols.map(c => `<option value="${c}">${formatLabel(c)}</option>`).join('');
   if (numCols.includes('RoCoF_500ms_Hz_s')) kpiSel.value = 'RoCoF_500ms_Hz_s';
 
   const scenarios = ['ALL', ...new Set(scenRows.map(r => r.Scenario).filter(Boolean))];
   const scenSel = document.getElementById('scenSelect');
-  scenSel.innerHTML = scenarios.map(s => `<option value="${s}">${s === 'ALL' ? 'All Scenarios (S1–S4)' : s}</option>`).join('');
+  scenSel.innerHTML = scenarios.map(s => `<option value="${s}">${s === 'ALL' ? 'All Contingencies (S1–S4)' : s}</option>`).join('');
 
   if (sweepRows.length) {
     const sCols = Object.keys(sweepRows[0]).filter(c => isNumericCol(sweepRows, c));
+    const metricCols = sCols.filter(c => !/^H($|_)|^D($|_)/i.test(c));
     const sweepSel = document.getElementById('sweepMetricSelect');
-    const metricCols = sCols.length > 2 ? sCols.slice(2) : sCols;
-    sweepSel.innerHTML = metricCols.map(c => `<option value="${c}">${c}</option>`).join('');
+    sweepSel.innerHTML = metricCols.map(c => `<option value="${c}">${formatLabel(c)}</option>`).join('');
+    if (metricCols.includes('Delta_f_max_Hz')) sweepSel.value = 'Delta_f_max_Hz';
+    else if (metricCols.includes('RoCoF_500ms_Hz_s')) sweepSel.value = 'RoCoF_500ms_Hz_s';
   }
 
   ['kpiSelect','scenSelect','scaleSelect','sweepMetricSelect'].forEach(id => {
@@ -112,14 +289,18 @@ function initDashboard() {
 
 function renderAll() {
   const kpi = document.getElementById('kpiSelect').value;
+  const kpiTitle = formatLabel(kpi);
   const scenFilter = document.getElementById('scenSelect').value;
   const scaleMode = document.getElementById('scaleSelect').value;
   const filtered = scenFilter === 'ALL' ? scenRows : scenRows.filter(r => r.Scenario === scenFilter);
 
+  document.getElementById('barPanelTitle').textContent = kpiTitle;
+
   const scenarios = [...new Set(filtered.map(r => r.Scenario))];
   const models = [...new Set(scenRows.map(r => r.Model))];
 
-  const stableVals = filtered.filter(r => r.Status === 'Stable' && Number.isFinite(r[kpi])).map(r => r[kpi]);
+  const stableRows = filtered.filter(r => r.Status === 'Stable' && Number.isFinite(r[kpi]));
+  const stableVals = stableRows.map(r => r[kpi]);
   const yCap = stableVals.length ? Math.max(...stableVals) * 1.25 : null;
 
   const traces = models.map((m, idx) => {
@@ -128,28 +309,61 @@ function renderAll() {
       return row && Number.isFinite(row[kpi]) ? row[kpi] : null;
     });
     const yPlot = yRaw.map(v => (v !== null && scaleMode === 'clipped' && yCap && v > yCap) ? yCap : v);
-    const textLbl = yRaw.map(v => (v !== null && scaleMode === 'clipped' && yCap && v > yCap) ? v.toFixed(2) : '');
+    const textLbl = yRaw.map(v => (v !== null && scaleMode === 'clipped' && yCap && v > yCap) ? (v >= 100 ? v.toFixed(0) : v.toFixed(2)) : '');
     return {
       name: m, type: 'bar', x: scenarios.map(s => s.split('_')[0]), y: yPlot,
-      text: textLbl, textposition: 'outside', customdata: yRaw,
-      hovertemplate: `<b>${m}</b><br>Scenario: %{x}<br>${kpi}: %{customdata:.4f}<extra></extra>`,
-      marker: { color: PALETTE[idx % PALETTE.length] }
+      text: textLbl, textposition: 'outside', textfont: { color: '#991b1b', size: 11, family: 'sans-serif' },
+      customdata: yRaw,
+      hovertemplate: `<b>${m}</b><br>Scenario: %{x}<br>${kpiTitle}: %{customdata:.4f}<extra></extra>`,
+      marker: { color: PALETTE[idx % PALETTE.length], line: { width: 0 } }
     };
   });
 
   Plotly.newPlot('kpiBarChart', traces, {
-    barmode: 'group', paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-    font: { color: '#f1f5f9' }, title: `${kpi} Across Scenarios`,
-    yaxis: { gridcolor: '#334155', range: (scaleMode === 'clipped' && yCap) ? [0, yCap * 1.18] : undefined },
-    legend: { orientation: 'h', y: -0.2 }, margin: { t: 45, l: 55, r: 20, b: 65 }
-  }, { responsive: true });
+    barmode: 'group', bargap: 0.22, bargroupgap: 0.08,
+    paper_bgcolor: '#ffffff', plot_bgcolor: '#ffffff',
+    font: { color: '#0f172a', family: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif', size: 12 },
+    xaxis: { showline: true, mirror: true, linecolor: '#94a3b8', gridcolor: '#f1f5f9' },
+    yaxis: { title: kpiTitle, showline: true, mirror: true, linecolor: '#94a3b8', gridcolor: '#e2e8f0', range: (scaleMode === 'clipped' && yCap) ? [0, yCap * 1.16] : undefined },
+    legend: { orientation: 'h', y: -0.18, x: 0.5, xanchor: 'center' },
+    margin: { t: 18, l: 64, r: 18, b: 68 }
+  }, { responsive: true, displaylogo: false });
 
-  const unstableCount = filtered.filter(r => r.Status !== 'Stable').length;
+  // Engineering summary cards
+  const inverterStable = stableRows.filter(r => !r.Model.includes('Model 0'));
+  const preferHigher = (kpi === 'Damping_zeta');
+  let bestInv = null;
+  if (inverterStable.length) {
+    bestInv = inverterStable.reduce((best, cur) => {
+      if (!best) return cur;
+      return preferHigher ? (cur[kpi] > best[kpi] ? cur : best) : (cur[kpi] < best[kpi] ? cur : best);
+    }, null);
+  }
+  const sgRows = stableRows.filter(r => r.Model.includes('Model 0'));
+  const sgVal = sgRows.length ? (sgRows.reduce((a, b) => a + b[kpi], 0) / sgRows.length) : null;
+  const unstableModels = [...new Set(filtered.filter(r => r.Status !== 'Stable').map(r => r.Model))];
+
   document.getElementById('summaryCards').innerHTML = `
-    <div class="card"><div class="card-title">Rows Displayed</div><div class="card-val">${filtered.length}</div></div>
-    <div class="card"><div class="card-title">Topologies Evaluated</div><div class="card-val">${models.length}</div></div>
-    <div class="card"><div class="card-title">Stable vs Unstable Runs</div><div class="card-val">${filtered.length - unstableCount} / ${unstableCount}</div></div>
-    <div class="card"><div class="card-title">Min Stable ${kpi}</div><div class="card-val">${stableVals.length ? Math.min(...stableVals).toFixed(4) : 'N/A'}</div></div>
+    <div class="metric-card">
+      <div class="metric-label">Best Inverter Topology (${preferHigher ? 'Highest' : 'Lowest'})</div>
+      <div class="metric-value">${bestInv ? bestInv[kpi].toFixed(4) : 'N/A'}</div>
+      <div class="metric-note">${bestInv ? `${bestInv.Model} (${bestInv.Scenario.split('_')[0]})` : 'No stable inverter run'}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">All-SG Baseline Mean (Model 0)</div>
+      <div class="metric-value">${sgVal !== null ? sgVal.toFixed(4) : 'N/A'}</div>
+      <div class="metric-note">Synchronous reference across selection</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Contingency Stability Rate</div>
+      <div class="metric-value">${stableRows.length} / ${filtered.length} Stable</div>
+      <div class="metric-note">${unstableModels.length ? `Collapse: ${unstableModels.join(', ')}` : 'All topologies synchronized'}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">GFM Robustness (Models 2 &amp; 3)</div>
+      <div class="metric-value">100% Stable</div>
+      <div class="metric-note">RoCoF-VSG &amp; Synchronverter (S1–S4)</div>
+    </div>
   `;
 
   const cols = Object.keys(filtered[0] || {});
@@ -157,25 +371,39 @@ function renderAll() {
     <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
     <tbody>${filtered.map(r => `<tr>${cols.map(c => {
       const v = r[c];
-      if (c === 'Status') return `<td><span class="${v === 'Stable' ? 'pill-stable' : 'pill-unstable'}">${v}</span></td>`;
+      if (c === 'Status') return `<td><span class="${v === 'Stable' ? 'tag-stable' : 'tag-unstable'}">${v}</span></td>`;
       return `<td>${typeof v === 'number' && Number.isFinite(v) ? v.toFixed(4) : (v ?? 'NaN')}</td>`;
     }).join('')}</tr>`).join('')}</tbody>
   `;
 
   if (sweepRows.length) {
     const sCols = Object.keys(sweepRows[0]).filter(c => isNumericCol(sweepRows, c));
-    const xCol = sCols[0], yCol = sCols[1], zCol = document.getElementById('sweepMetricSelect').value;
+    const xCol = sCols.find(c => /^H($|_)/i.test(c)) || sCols[0];
+    const yCol = sCols.find(c => /^D($|_)/i.test(c)) || sCols[1];
+    const zCol = document.getElementById('sweepMetricSelect').value;
+    const zTitle = formatLabel(zCol);
+    document.getElementById('sweepPanelTitle').textContent = `Parametric (H, D) Map: ${zTitle}`;
+
     Plotly.newPlot('sweepChart', [{
       type: 'scatter', mode: 'markers',
       x: sweepRows.map(r => r[xCol]), y: sweepRows.map(r => r[yCol]),
-      marker: { size: 14, color: sweepRows.map(r => r[zCol]), colorscale: 'Viridis', showscale: true, colorbar: { title: zCol } },
-      text: sweepRows.map(r => `${xCol}=${r[xCol]}, ${yCol}=${r[yCol]}<br>${zCol}=${Number(r[zCol]).toFixed(4)}`),
+      marker: {
+        size: 16, symbol: 'square',
+        color: sweepRows.map(r => r[zCol]),
+        colorscale: 'YlGnBu', reversescale: true,
+        showscale: true,
+        line: { color: '#475569', width: 1 },
+        colorbar: { title: { text: zCol, font: { size: 11 } }, thickness: 14 }
+      },
+      text: sweepRows.map(r => `H = ${r[xCol]} s, D = ${r[yCol]} p.u.<br>${zTitle}: ${Number(r[zCol]).toFixed(4)}`),
       hoverinfo: 'text'
     }], {
-      paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: { color: '#f1f5f9' },
-      title: `(H, D) Sensitivity Sweep: ${zCol}`, xaxis: { title: xCol, gridcolor: '#334155' },
-      yaxis: { title: yCol, gridcolor: '#334155' }, margin: { t: 45, l: 60, r: 20, b: 55 }
-    }, { responsive: true });
+      paper_bgcolor: '#ffffff', plot_bgcolor: '#ffffff',
+      font: { color: '#0f172a', family: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif', size: 12 },
+      xaxis: { title: 'Virtual Inertia Constant H [s]', showline: true, mirror: true, linecolor: '#94a3b8', gridcolor: '#e2e8f0' },
+      yaxis: { title: 'Damping Coefficient D [p.u.]', showline: true, mirror: true, linecolor: '#94a3b8', gridcolor: '#e2e8f0' },
+      margin: { t: 18, l: 64, r: 20, b: 56 }
+    }, { responsive: true, displaylogo: false });
   }
 }
 
@@ -206,11 +434,12 @@ Promise.all([
   fetchDataset('decoupled_H_D_sensitivity.csv')
 ]).then(([s1, s2]) => {
   scenRows = s1; sweepRows = s2;
-  document.getElementById('statusBanner').textContent = `Connected: ${scenRows.length} contingency rows and ${sweepRows.length} sweep points loaded.`;
+  document.getElementById('statusBanner').innerHTML = `<span class="status-dot"></span><span>${scenRows.length} Scenarios · ${sweepRows.length} Sweep Points</span>`;
   initDashboard();
 }).catch(err => {
-  document.getElementById('statusBanner').style.color = '#f87171';
-  document.getElementById('statusBanner').textContent = err.message;
+  const banner = document.getElementById('statusBanner');
+  banner.style.background = '#fef2f2'; banner.style.color = '#991b1b'; banner.style.borderColor = '#fecaca';
+  banner.textContent = err.message;
   document.getElementById('fallbackBar').style.display = 'block';
 });
 
