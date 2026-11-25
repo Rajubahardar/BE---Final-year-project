@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WSCC 9-Bus Grid-Forming Control Benchmark Explorer</title>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    :root { --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #f1f5f9; --muted: #94a3b8; --accent: #38bdf8; }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding: 24px; }
+    .container { max-width: 1400px; margin: 0 auto; }
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
+    h1 { margin: 0; font-size: 1.5rem; }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+    .badge { background: rgba(56,189,248,0.15); color: var(--accent); border: 1px solid rgba(56,189,248,0.4); padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; text-decoration: none; }
+    .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    select, input[type=file] { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 0.9rem; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .card-title { font-size: 0.8rem; color: var(--muted); }
+    .card-val { font-size: 1.45rem; font-weight: 700; margin-top: 6px; color: var(--accent); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    @media (max-width: 960px) { .grid-2 { grid-template-columns: 1fr; } }
+    .chart-box { height: 420px; width: 100%; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+    th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--card); }
+    .table-wrap { max-height: 360px; overflow: auto; }
+    .pill-unstable { background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+    .pill-stable { background: rgba(34,197,94,0.2); color: #4ade80; padding: 2px 8px; border-radius: 6px; }
+    #fallbackBar { display: none; background: #1e293b; border: 1px dashed var(--accent); padding: 14px; border-radius: 10px; margin-bottom: 18px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>WSCC 9-Bus Grid-Forming Control Benchmark Explorer</h1>
+      <div class="subtitle">100% Data-Driven Interactive Dashboard — Dynamically parsed from <code>results/*.csv</code></div>
+    </div>
+    <a class="badge" href="https://github.com/Rajubahardar/BE---Final-year-project" target="_blank">GitHub Repository ↗</a>
+  </header>
+
+  <div id="fallbackBar">
+    <strong>Local file:// mode detected:</strong> Select <code>reviewer_fixed_all_scenarios.csv</code> and <code>decoupled_H_D_sensitivity.csv</code> from your <code>results/</code> folder to load data:
+    <input type="file" id="csvPicker" accept=".csv" multiple style="margin-top:8px;" />
+  </div>
+
+  <div class="controls">
+    <div><label for="kpiSelect">Primary Benchmark KPI</label><select id="kpiSelect"></select></div>
+    <div><label for="scenSelect">Scenario Filter</label><select id="scenSelect"></select></div>
+    <div><label for="scaleSelect">Outlier Scaling Mode</label>
+      <select id="scaleSelect">
+        <option value="clipped">Clip Unstable Outliers (Preserve Stable Resolution)</option>
+        <option value="raw">Raw Unclipped CSV Values</option>
+      </select>
+    </div>
+    <div><label for="sweepMetricSelect">(H, D) Sensitivity Sweep Metric</label><select id="sweepMetricSelect"></select></div>
+  </div>
+
+  <div class="kpis" id="summaryCards"></div>
+
+  <div class="grid-2">
+    <div class="card"><div id="kpiBarChart" class="chart-box"></div></div>
+    <div class="card"><div id="sweepChart" class="chart-box"></div></div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:600; margin-bottom:10px;">Live CSV Dataset Records</div>
+    <div class="table-wrap"><table id="dataTable"></table></div>
+  </div>
+</div>
+
+<script>
+let scenRows = [], sweepRows = [];
+const PALETTE = ['#38bdf8', '#f87171', '#facc15', '#4ade80', '#c084fc', '#fb923c'];
+
+function isNumericCol(rows, col) {
+  return rows.some(r => typeof r[col] === 'number' && Number.isFinite(r[col]));
+}
+
+function initDashboard() {
+  if (!scenRows.length) return;
+  const cols = Object.keys(scenRows[0]);
+  const numCols = cols.filter(c => isNumericCol(scenRows, c));
+  const kpiSel = document.getElementById('kpiSelect');
+  kpiSel.innerHTML = numCols.map(c => `<option value="${c}">${c}</option>`).join('');
+  if (numCols.includes('RoCoF_500ms_Hz_s')) kpiSel.value = 'RoCoF_500ms_Hz_s';
+
+  const scenarios = ['ALL', ...new Set(scenRows.map(r => r.Scenario).filter(Boolean))];
+  const scenSel = document.getElementById('scenSelect');
+  scenSel.innerHTML = scenarios.map(s => `<option value="${s}">${s === 'ALL' ? 'All Scenarios (S1–S4)' : s}</option>`).join('');
+
+  if (sweepRows.length) {
+    const sCols = Object.keys(sweepRows[0]).filter(c => isNumericCol(sweepRows, c));
+    const sweepSel = document.getElementById('sweepMetricSelect');
+    const metricCols = sCols.slice(2);
+    sweepSel.innerHTML = metricCols.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+
+  ['kpiSelect','scenSelect','scaleSelect','sweepMetricSelect'].forEach(id => {
+    document.getElementById(id).addEventListener('change', renderAll);
+  });
+  renderAll();
+}
+
+function renderAll() {
+  const kpi = document.getElementById('kpiSelect').value;
+  const scenFilter = document.getElementById('scenSelect').value;
+  const scaleMode = document.getElementById('scaleSelect').value;
+  const filtered = scenFilter === 'ALL' ? scenRows : scenRows.filter(r => r.Scenario === scenFilter);
+
+  const scenarios = [...new Set(filtered.map(r => r.Scenario))];
+  const models = [...new Set(scenRows.map(r => r.Model))];
+
+  const stableVals = filtered.filter(r => r.Status === 'Stable' && Number.isFinite(r[kpi])).map(r => r[kpi]);
+  const yCap = stableVals.length ? Math.max(...stableVals) * 1.25 : null;
+
+  const traces = models.map((m, idx) => {
+    const yRaw = scenarios.map(s => {
+      const row = filtered.find(r => r.Scenario === s && r.Model === m);
+      return row && Number.isFinite(row[kpi]) ? row[kpi] : null;
+    });
+    const yPlot = yRaw.map(v => (v !== null && scaleMode === 'clipped' && yCap && v > yCap) ? yCap : v);
+    const textLbl = yRaw.map(v => (v !== null && scaleMode === 'clipped' && yCap && v > yCap) ? v.toFixed(2) : '');
+    return {
+      name: m, type: 'bar', x: scenarios.map(s => s.split('_')[0]), y: yPlot,
+      text: textLbl, textposition: 'outside', customdata: yRaw,
+      hovertemplate: `<b>${m}</b><br>Scenario: %{x}<br>${kpi}: %{customdata:.4f}<extra></extra>`,
+      marker: { color: PALETTE[idx % PALETTE.length] }
+    };
+  });
+
+  Plotly.newPlot('kpiBarChart', traces, {
+    barmode: 'group', paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
+    font: { color: '#f1f5f9' }, title: `${kpi} Across Scenarios`,
+    yaxis: { gridcolor: '#334155', range: (scaleMode === 'clipped' && yCap) ? [0, yCap * 1.18] : undefined },
+    legend: { orientation: 'h', y: -0.2 }, margin: { t: 45, l: 55, r: 20, b: 65 }
+  }, { responsive: true });
+
+  const unstableCount = filtered.filter(r => r.Status !== 'Stable').length;
+  document.getElementById('summaryCards').innerHTML = `
+    <div class="card"><div class="card-title">Rows Displayed</div><div class="card-val">${filtered.length}</div></div>
+    <div class="card"><div class="card-title">Topologies Evaluated</div><div class="card-val">${models.length}</div></div>
+    <div class="card"><div class="card-title">Stable vs Unstable Runs</div><div class="card-val">${filtered.length - unstableCount} / ${unstableCount}</div></div>
+    <div class="card"><div class="card-title">Min Stable ${kpi}</div><div class="card-val">${stableVals.length ? Math.min(...stableVals).toFixed(4) : 'N/A'}</div></div>
+  `;
+
+  const cols = Object.keys(filtered[0] || {});
+  document.getElementById('dataTable').innerHTML = `
+    <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+    <tbody>${filtered.map(r => `<tr>${cols.map(c => {
+      const v = r[c];
+      if (c === 'Status') return `<td><span class="${v === 'Stable' ? 'pill-stable' : 'pill-unstable'}">${v}</span></td>`;
+      return `<td>${typeof v === 'number' && Number.isFinite(v) ? v.toFixed(4) : (v ?? 'NaN')}</td>`;
+    }).join('')}</tr>`).join('')}</tbody>
+  `;
+
+  if (sweepRows.length) {
+    const sCols = Object.keys(sweepRows[0]).filter(c => isNumericCol(sweepRows, c));
+    const xCol = sCols[0], yCol = sCols[1], zCol = document.getElementById('sweepMetricSelect').value;
+    Plotly.newPlot('sweepChart', [{
+      type: 'scatter', mode: 'markers',
+      x: sweepRows.map(r => r[xCol]), y: sweepRows.map(r => r[yCol]),
+      marker: { size: 14, color: sweepRows.map(r => r[zCol]), colorscale: 'Viridis', showscale: true, colorbar: { title: zCol } },
+      text: sweepRows.map(r => `${xCol}=${r[xCol]}, ${yCol}=${r[yCol]}<br>${zCol}=${Number(r[zCol]).toFixed(4)}`),
+      hoverinfo: 'text'
+    }], {
+      paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: { color: '#f1f5f9' },
+      title: `(H, D) Sensitivity Sweep: ${zCol}`, xaxis: { title: xCol, gridcolor: '#334155' },
+      yaxis: { title: yCol, gridcolor: '#334155' }, margin: { t: 45, l: 60, r: 20, b: 55 }
+    }, { responsive: true });
+  }
+}
+
+function loadFromUrl() {
+  Promise.all([
+    new Promise((res, rej) => Papa.parse('../results/reviewer_fixed_all_scenarios.csv', { download: true, header: true, dynamicTyping: true, skipEmptyLines: true, complete: r => res(r.data), error: rej })),
+    new Promise((res, rej) => Papa.parse('../results/decoupled_H_D_sensitivity.csv', { download: true, header: true, dynamicTyping: true, skipEmptyLines: true, complete: r => res(r.data), error: rej }))
+  ]).then(([s1, s2]) => { scenRows = s1; sweepRows = s2; initDashboard(); })
+    .catch(() => { document.getElementById('fallbackBar').style.display = 'block'; });
+}
+
+document.getElementById('csvPicker').addEventListener('change', e => {
+  [...e.target.files].forEach(file => {
+    Papa.parse(file, { header: true, dynamicTyping: true, skipEmptyLines: true, complete: r => {
+      if (file.name.includes('scenario')) scenRows = r.data;
+      if (file.name.includes('sensitivity')) sweepRows = r.data;
+      initDashboard();
+    }});
+  });
+});
+
+loadFromUrl();
+</script>
+</body>
+</html>

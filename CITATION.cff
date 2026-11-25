@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use these models, controller parameters, or benchmark datasets, please cite this repository."
+title: "Multi-Domain Transient and Grid-Forming Control Benchmark on the WSCC 9-Bus System"
+authors:
+  - family-names: "Bahardar"
+    given-names: "Raju"
+year: 2026
+license: MIT
+url: "https://github.com/Rajubahardar/BE---Final-year-project"
+keywords:
+  - MATLAB
+  - Simulink
+  - Grid-Forming Inverter
+  - Virtual Synchronous Generator
+  - Synchronverter
+  - WSCC 9-Bus

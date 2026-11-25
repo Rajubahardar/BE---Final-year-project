@@ -1,11 +1,15 @@
 # Multi-Domain Transient & Grid-Forming Control Benchmark on the WSCC 9-Bus System
 
-[![Platform](https://img.shields.io/badge/MATLAB%20%2F%20Simulink-EMT%20%26%20Phasor-0076A8?logo=mathworks&logoColor=white)](https://www.mathworks.com/)
+[![Open in MATLAB Online](https://www.mathworks.com/images/responsive/global/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=Rajubahardar/BE---Final-year-project)
+[![MATLAB CI](https://github.com/Rajubahardar/BE---Final-year-project/actions/workflows/ci.yml/badge.svg)](https://github.com/Rajubahardar/BE---Final-year-project/actions/workflows/ci.yml)
+[![Interactive Dashboard](https://img.shields.io/badge/Dashboard-Interactive%20KPI%20Explorer-38BDF8?logo=plotly&logoColor=white)](https://rajubahardar.github.io/BE---Final-year-project/dashboard/)
 [![Test System](https://img.shields.io/badge/Benchmark-WSCC%209--Bus%20(60%20Hz)-2E7D32)](#system-architecture--models)
 [![Solver](https://img.shields.io/badge/Fixed--Step%20ode4-50%20%C2%B5s%20%2F%2025%20%C2%B5s-6A1B9A)](#reproducibility--quick-start)
-[![Data](https://img.shields.io/badge/Results-S1--S4%20%2B%2032--Point%20(H%2CD)%20Sweep-E65100)](#benchmark-results-s1s4)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A reproducible multi-domain electromagnetic transient (EMT) and phasor-domain benchmark comparing **Grid-Following (GFL)** and **Grid-Forming (GFM)** inverter topologies against a conventional synchronous-generator baseline on the standard **WSCC 9-bus** network. The suite evaluates four operating contingencies (`S1`–`S4`)—including weak-grid loss-of-synchronism verification across solver timesteps ($50\ \mu\text{s}$ vs. $25\ \mu\text{s}$)—and a **32-point decoupled $(H, D)$ sensitivity sweep**.
+
+> **Explore Live:** Launch the **[Interactive Benchmark Dashboard](https://rajubahardar.github.io/BE---Final-year-project/dashboard/)** in your browser (dynamically driven by `results/*.csv`) or click **Open in MATLAB Online** above to run the test suite and plotting tools without local installation.
 
 ---
 
@@ -83,12 +87,7 @@ Full 10-KPI contingency metrics exported directly from [`results/reviewer_fixed_
 | | Model 2 (RoCoF-VSG) | Stable | 0.1693 | **0.1248** | **9.99** | 0.3621 | **18.78** | 17.13 | **29.52** | 12.84 | 0.34 | 0.38 |
 | | Model 3 (Synchronverter) | Stable | **0.1603** | 0.2820 | 14.52 | 1.0000 | 25.00 | **7.51** | `NaN` | **9.85** | **0.21** | **0.24** |
 
-> *Bold values indicate the best-performing stable inverter topology (`Models 1–3`) per metric within each scenario. Complete 16-column records (including pre-fault frequency $f_{\text{pre}}$, frequency extremum $f_{\text{ext}}$, and peak active-power deviation $\Delta P_{\text{peak}}$ in MW) are archived in [`results/reviewer_fixed_all_scenarios.csv`](results/reviewer_fixed_all_scenarios.csv); the 32-point parametric sweep is in [`results/decoupled_H_D_sensitivity.csv`](results/decoupled_H_D_sensitivity.csv).*
-
-### KPI Definitions
-- **Normalized Power Surge ($\Delta P_{\text{peak}} / S_{\text{rated}}$):** Evaluated on each unit's rated base ($100\text{ MVA}$ for `Model 0` and `S4`; $11\text{ MVA}$ for inverter PCCs in `S1`–`S3`).
-- **Frequency & Active-Power Settling Times ($t_{s,f}$, $t_{s,P}$):** Elapsed time after the $t = 50\text{ s}$ disturbance for PCC frequency ($\pm 0.02\text{ Hz}$) and active power to enter and remain within their steady-state bands (capped at the $25.00\text{ s}$ post-disturbance observation window).
-- **Step Overshoot ($PO_{P,\text{step}}$) & Damping Ratio ($\zeta$):** Overshoot is evaluated only when $\vert{}\Delta P_{\text{ss}}\vert{} \ge 0.05\,S_{\text{rated}}$; near-zero steady-state shifts and unstable loss-of-synchronism cases are reported as `NaN` to avoid ill-conditioned division.
+> *Bold values indicate the best-performing stable inverter topology (`Models 1–3`) per metric within each scenario. Complete 16-column records are archived in [`results/reviewer_fixed_all_scenarios.csv`](results/reviewer_fixed_all_scenarios.csv); the 32-point parametric sweep is in [`results/decoupled_H_D_sensitivity.csv`](results/decoupled_H_D_sensitivity.csv).*
 
 ---
 
@@ -107,13 +106,11 @@ $$2H\,\frac{d\Delta\omega}{dt} = P_{\text{set}} - P_e - D_p\,\Delta\omega - K_{\
 | | Proportional–Integral Gains | $K_{ip} = \omega_{ci} L_s$, $\quad K_{vp} = \omega_{cv} C_f$, $\quad K_{vi} = K_{vp}(\omega_{cv}/4)$ |
 | | Active Damping & Filtering | $R_d = \dfrac{1}{3\omega_{\text{res}} C_f}$, $\quad \omega_{c,\text{lp}} = 2\pi(20)\text{ rad/s}$ |
 
----
-
 ### Model 3 — Synchronverter
 
 $$J\,\frac{d\omega}{dt} = T_m - T_e - D_p(\omega - \omega_n), \qquad T_e = M_f i_f \langle i_g, \widetilde{\sin}\theta \rangle, \qquad e = \omega M_f i_f \widetilde{\sin}\theta$$
 
-$$K_v\,\frac{d(M_f i_f)}{dt} = Q_{\text{set}} - Q + D_q(V_{n,\text{peak}} - \vert{}V_g\vert{}), \qquad Q = -\omega M_f i_f \langle i_g, \widetilde{\cos}\theta \rangle$$
+$$K_v\,\frac{d(M_f i_f)}{dt} = Q_{\text{set}} - Q + D_q(V_{n,\text{peak}} - \lvert{}V_g\rvert{}), \qquad Q = -\omega M_f i_f \langle i_g, \widetilde{\cos}\theta \rangle$$
 
 | Parameter | Expression | Value ($11\text{ MVA}$ Base) |
 | :--- | :--- | :--- |
@@ -128,8 +125,12 @@ $$K_v\,\frac{d(M_f i_f)}{dt} = Q_{\text{set}} - Q + D_q(V_{n,\text{peak}} - \ver
 
 ```text
 BE---Final-year-project/
-├── demo_all.m                                  # Prints formatted S1–S4 & 32-point (H, D) tables
-├── plot_all_10_kpis.m                          # Generates 300-DPI 2x5 comparison of all 10 KPIs
+├── .github/workflows/ci.yml                    # Automated MATLAB unit tests on every push
+├── +wscc9/                                     # Namespaced MATLAB package with docstrings
+│   ├── loadBenchmarkData.m                     # Validated CSV dataset loader
+│   └── plotAll10KPIs.m                         # 300-DPI 2x5 KPI comparison generator
+├── dashboard/
+│   └── index.html                              # Zero-hardcoding interactive web explorer
 ├── models/                                     # Simulink (.slx) models & parameter (.mat) files
 ├── results/
 │   ├── reviewer_fixed_all_scenarios.csv        # Complete S1–S4 KPIs, zeta & THD metrics
@@ -138,33 +139,31 @@ BE---Final-year-project/
 │   ├── s3_weak_grid_collapse.png               # Weak-grid collapse & 50/25 us verification (300 DPI)
 │   ├── decoupled_H_D_sensitivity.png           # Parametric (H, D) sensitivity map (300 DPI)
 │   └── all_10_kpis_comparison.png              # All 10 KPIs grouped comparison figure (300 DPI)
-└── README.md
+├── tests/
+│   └── BenchmarkVerificationTest.m             # matlab.unittest schema & plotting verification
+├── demo_all.m                                  # Prints formatted S1–S4 & 32-point (H, D) tables
+├── plot_all_10_kpis.m                          # Root wrapper calling wscc9.plotAll10KPIs()
+├── startup.m                                   # Configures paths & isolates _sim_cache/
+├── CITATION.cff                                # Native GitHub citation widget metadata
+└── LICENSE                                     # MIT License
 ```
 
 ---
 
 ## Reproducibility & Quick Start
 
-### Prerequisites
-- **MATLAB & Simulink** (with Simscape Electrical / Specialized Power Systems to re-run `.slx` models; base MATLAB is sufficient to inspect all published tables via `demo_all.m` or regenerate `results/all_10_kpis_comparison.png` via `plot_all_10_kpis.m`).
-
-### Reproduce Summary Tables & 10-KPI Figure
-Clone the repository and run `demo_all` and `plot_all_10_kpis` in the MATLAB Command Window:
-
 ```matlab
 git clone [https://github.com/Rajubahardar/BE---Final-year-project.git](https://github.com/Rajubahardar/BE---Final-year-project.git)
 cd('BE---Final-year-project');
+startup
 demo_all
-plot_all_10_kpis
+wscc9.plotAll10KPIs();
+runtests('tests')
 ```
-
-This reads the verified CSV datasets under `results/` and reproduces the summary tables and the 300-DPI 10-KPI comparison figure without re-running Simulink.
 
 ---
 
 ## Citation
-
-If you use these models, controller parameters, or benchmark datasets in academic work, please cite this repository:
 
 ```bibtex
 @misc{bahardar2026wscc9gfm,
