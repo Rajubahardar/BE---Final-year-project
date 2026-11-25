@@ -54,36 +54,40 @@ A reproducible multi-domain electromagnetic transient (EMT) and phasor-domain be
 ![Decoupled H and D Sensitivity Sweep](results/decoupled_H_D_sensitivity.png)
 *32-point parametric map isolating the independent impact of virtual inertia constant $H$ and damping coefficient $D_{\text{pu}}$ on RoCoF, frequency nadir, settling time, and damping ratio $\zeta$.*
 
+### 4. All 10 Benchmark KPIs Across Scenarios (`S1`–`S4`)
+![All 10 Benchmark KPIs Comparison](results/all_10_kpis_comparison.png)
+*Grouped comparison of all 10 benchmark KPIs across `S1`–`S4`. Clipped red bars indicate `Model 1 (GFL PV)` loss of synchronism in `S3` and `S4` with exact CSV collapse values labeled above each bar.*
+
 ---
 
 ## Benchmark Results (`S1`–`S4`)
 
-Full contingency metrics exported from [`results/reviewer_fixed_all_scenarios.csv`](results/reviewer_fixed_all_scenarios.csv):
+Full 10-KPI contingency metrics exported directly from [`results/reviewer_fixed_all_scenarios.csv`](results/reviewer_fixed_all_scenarios.csv):
 
-| Scenario | Model | Status | $\text{RoCoF}_{500\text{ms}}$ (Hz/s) | $f_{\text{ext}}$ (Hz) | $\lvert \Delta f_{\max} \rvert$ (Hz) | $t_{s,f}$ (s) | $\Delta P_{\text{peak}}$ (MW) | $\Delta P / S_{\text{rated}}$ (%) | $\zeta$ | $\text{THD}_v$ / $\text{THD}_i$ (%) |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **`S1`** (+30 MW) | Model 0 (All-SG) | Stable | 0.1151 | 59.7835 | 0.2141 | 17.48 | 9.87 | 9.87 | 1.0000 | 0.00 / 0.00 |
-| | Model 1 (GFL PV) | Stable | 0.1715 | 59.7076 | 0.3111 | 19.60 | 10.50 | 95.44 | 0.2620 | — |
-| | Model 2 (RoCoF-VSG) | Stable | **0.1399** | 59.6778 | 0.3212 | 15.08 | **4.73** | **43.01** | 0.0526 | 0.20 / 0.23 |
-| | Model 3 (Synchronverter) | Stable | 0.1605 | **59.7661** | **0.2825** | **14.50** | 7.54 | 68.59 | 0.1296 | 0.30 / 0.33 |
-| **`S2`** (-45 MW) | Model 0 (All-SG) | Stable | 0.1734 | 60.0906 | 0.3191 | 18.96 | 14.82 | 14.82 | 1.0000 | 0.00 / 0.00 |
-| | Model 1 (GFL PV) | Stable | 0.2146 | 60.5857 | 0.4654 | 25.00 | 14.31 | 130.10 | 0.3550 | — |
-| | Model 2 (RoCoF-VSG) | Stable | **0.1926** | 60.5698 | 0.4871 | 25.00 | **7.18** | **65.29** | 0.0316 | 0.50 / 0.69 |
-| | Model 3 (Synchronverter) | Stable | 0.2238 | **60.5423** | **0.4238** | **19.08** | 11.70 | 106.39 | 0.1067 | 1.13 / 0.85 |
-| **`S3`** (Weak Grid) | Model 0 (All-SG) | Stable | 0.0917 | 59.6279 | 0.1983 | 17.76 | 7.88 | 7.88 | 1.0000 | 0.00 / 0.00 |
-| | Model 1 (GFL PV) | **Unstable** | 10.0155 | 56.0733 | 12.9780 | `NaN` | 283.60 | 2578.20 | `NaN` | — |
-| | Model 2 (RoCoF-VSG) | Stable | **0.1197** | 59.5576 | 0.4105 | 25.00 | **6.09** | **55.36** | 1.0000 | 0.45 / 0.42 |
-| | Model 3 (Synchronverter) | Stable | 0.1662 | **59.7937** | **0.3222** | 25.00 | 8.69 | 79.04 | 0.0286 | 0.04 / 0.05 |
-| **`S4`** (High-RES) | Model 0 (All-SG) | Stable | 0.1151 | 59.7835 | 0.2141 | 17.48 | 9.87 | 9.87 | 1.0000 | 0.00 / 0.00 |
-| | Model 1 (GFL PV) | **Unstable** | 0.3108 | 33.0450 | 26.7798 | `NaN` | 533.90 | 533.90 | `NaN` | — |
-| | Model 2 (RoCoF-VSG) | Stable | 0.1693 | **59.8043** | **0.1248** | **9.99** | 17.13 | 17.13 | 0.3621 | 0.34 / 0.38 |
-| | Model 3 (Synchronverter) | Stable | **0.1603** | 59.7791 | 0.2820 | 14.52 | **7.51** | **7.51** | 1.0000 | 0.21 / 0.24 |
+| Scenario | Model | Status | 1. $\text{RoCoF}_{500\text{ms}}$ (Hz/s) | 2. $\lvert\Delta f_{\max}\rvert$ (Hz) | 3. $t_{s,f}$ (s) | 4. $\zeta$ | 5. $t_{s,P}$ (s) | 6. $\Delta P / S_{\text{rated}}$ (%) | 7. $PO_{P,\text{step}}$ (%) | 8. $\Delta V_{\text{PCC,max}}$ (%) | 9. $\text{THD}_v$ (%) | 10. $\text{THD}_i$ (%) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **`S1`** (+30 MW) | Model 0 (All-SG) | Stable | 0.1151 | 0.2141 | 17.48 | 1.0000 | 14.62 | 9.87 | 95.96 | `NaN` | 0.00 | 0.00 |
+| | Model 1 (GFL PV) | Stable | 0.1715 | 0.3111 | 19.60 | 0.2620 | 25.00 | 95.44 | 42.62 | `NaN` | `NaN` | `NaN` |
+| | Model 2 (RoCoF-VSG) | Stable | **0.1399** | 0.3212 | 15.08 | 0.0526 | 25.00 | **43.01** | 84.74 | **5.61** | **0.20** | **0.23** |
+| | Model 3 (Synchronverter) | Stable | 0.1605 | **0.2825** | **14.50** | 0.1296 | 25.00 | 68.59 | 66.33 | 9.92 | 0.30 | 0.33 |
+| **`S2`** (-45 MW) | Model 0 (All-SG) | Stable | 0.1734 | 0.3191 | 18.96 | 1.0000 | 14.67 | 14.82 | 97.01 | `NaN` | 0.00 | 0.00 |
+| | Model 1 (GFL PV) | Stable | 0.2146 | 0.4654 | 25.00 | 0.3550 | 25.00 | 130.10 | 30.33 | `NaN` | `NaN` | `NaN` |
+| | Model 2 (RoCoF-VSG) | Stable | **0.1926** | 0.4871 | 25.00 | 0.0316 | 25.00 | **65.29** | 90.54 | 11.44 | **0.50** | **0.69** |
+| | Model 3 (Synchronverter) | Stable | 0.2238 | **0.4238** | **19.08** | 0.1067 | 25.00 | 106.39 | 71.38 | **8.99** | 1.13 | 0.85 |
+| **`S3`** (Weak Grid) | Model 0 (All-SG) | Stable | 0.0917 | 0.1983 | 17.76 | 1.0000 | 13.59 | 7.88 | `NaN` | `NaN` | 0.00 | 0.00 |
+| | Model 1 (GFL PV) | **Unstable** | 10.0155 | 12.9780 | `NaN` | `NaN` | `NaN` | 2578.20 | `NaN` | `NaN` | `NaN` | `NaN` |
+| | Model 2 (RoCoF-VSG) | Stable | **0.1197** | 0.4105 | 25.00 | 1.0000 | 25.00 | **55.36** | 150.41 | 11.72 | 0.45 | 0.42 |
+| | Model 3 (Synchronverter) | Stable | 0.1662 | **0.3222** | 25.00 | 0.0286 | 25.00 | 79.04 | **91.41** | **8.90** | **0.04** | **0.05** |
+| **`S4`** (High-RES) | Model 0 (All-SG) | Stable | 0.1151 | 0.2141 | 17.48 | 1.0000 | 14.62 | 9.87 | 95.96 | `NaN` | 0.00 | 0.00 |
+| | Model 1 (GFL PV) | **Unstable** | 0.3108 | 26.7798 | `NaN` | `NaN` | `NaN` | 533.90 | `NaN` | `NaN` | `NaN` | `NaN` |
+| | Model 2 (RoCoF-VSG) | Stable | 0.1693 | **0.1248** | **9.99** | 0.3621 | **18.78** | 17.13 | **29.52** | 12.84 | 0.34 | 0.38 |
+| | Model 3 (Synchronverter) | Stable | **0.1603** | 0.2820 | 14.52 | 1.0000 | 25.00 | **7.51** | `NaN` | **9.85** | **0.21** | **0.24** |
 
-> *Bold values indicate the best-performing stable inverter topology (`Models 1–3`) per metric within each scenario. Complete 16-column records (including $f_{\text{pre}}$, active-power settling time $t_{s,P}$, step overshoot $PO_{P,\text{step}}$, and PCC voltage deviation $\Delta V_{\text{PCC},\max}$) are archived in [`results/reviewer_fixed_all_scenarios.csv`](results/reviewer_fixed_all_scenarios.csv); the 32-point parametric sweep is in [`results/decoupled_H_D_sensitivity.csv`](results/decoupled_H_D_sensitivity.csv).*
+> *Bold values indicate the best-performing stable inverter topology (`Models 1–3`) per metric within each scenario. Complete 16-column records (including pre-fault frequency $f_{\text{pre}}$, frequency extremum $f_{\text{ext}}$, and peak active-power deviation $\Delta P_{\text{peak}}$ in MW) are archived in [`results/reviewer_fixed_all_scenarios.csv`](results/reviewer_fixed_all_scenarios.csv); the 32-point parametric sweep is in [`results/decoupled_H_D_sensitivity.csv`](results/decoupled_H_D_sensitivity.csv).*
 
 ### KPI Definitions
 - **Normalized Power Surge ($\Delta P_{\text{peak}} / S_{\text{rated}}$):** Evaluated on each unit's rated base ($100\text{ MVA}$ for `Model 0` and `S4`; $11\text{ MVA}$ for inverter PCCs in `S1`–`S3`).
-- **Frequency Settling Time ($t_{s,f}$):** Elapsed time after the $t = 50\text{ s}$ disturbance for PCC frequency to enter and remain within $\pm 0.02\text{ Hz}$ of post-disturbance steady-state $f_{\text{ss}}$ (capped at the $25.00\text{ s}$ post-disturbance observation window).
+- **Frequency & Active-Power Settling Times ($t_{s,f}$, $t_{s,P}$):** Elapsed time after the $t = 50\text{ s}$ disturbance for PCC frequency ($\pm 0.02\text{ Hz}$) and active power to enter and remain within their steady-state bands (capped at the $25.00\text{ s}$ post-disturbance observation window).
 - **Step Overshoot ($PO_{P,\text{step}}$) & Damping Ratio ($\zeta$):** Overshoot is evaluated only when $\vert{}\Delta P_{\text{ss}}\vert{} \ge 0.05\,S_{\text{rated}}$; near-zero steady-state shifts and unstable loss-of-synchronism cases are reported as `NaN` to avoid ill-conditioned division.
 
 ---
@@ -125,13 +129,15 @@ $$K_v\,\frac{d(M_f i_f)}{dt} = Q_{\text{set}} - Q + D_q(V_{n,\text{peak}} - \ver
 ```text
 BE---Final-year-project/
 ├── demo_all.m                                  # Prints formatted S1–S4 & 32-point (H, D) tables
+├── plot_all_10_kpis.m                          # Generates 300-DPI 2x5 comparison of all 10 KPIs
 ├── models/                                     # Simulink (.slx) models & parameter (.mat) files
 ├── results/
 │   ├── reviewer_fixed_all_scenarios.csv        # Complete S1–S4 KPIs, zeta & THD metrics
 │   ├── decoupled_H_D_sensitivity.csv           # 32-point decoupled (H, D) sweep data
 │   ├── multi_scenario_benchmark.png            # Cross-scenario comparative figure (300 DPI)
 │   ├── s3_weak_grid_collapse.png               # Weak-grid collapse & 50/25 us verification (300 DPI)
-│   └── decoupled_H_D_sensitivity.png           # Parametric (H, D) sensitivity map (300 DPI)
+│   ├── decoupled_H_D_sensitivity.png           # Parametric (H, D) sensitivity map (300 DPI)
+│   └── all_10_kpis_comparison.png              # All 10 KPIs grouped comparison figure (300 DPI)
 └── README.md
 ```
 
@@ -140,18 +146,19 @@ BE---Final-year-project/
 ## Reproducibility & Quick Start
 
 ### Prerequisites
-- **MATLAB & Simulink** (with Simscape Electrical / Specialized Power Systems to re-run `.slx` models; base MATLAB is sufficient to inspect all published tables via `demo_all.m`).
+- **MATLAB & Simulink** (with Simscape Electrical / Specialized Power Systems to re-run `.slx` models; base MATLAB is sufficient to inspect all published tables via `demo_all.m` or regenerate `results/all_10_kpis_comparison.png` via `plot_all_10_kpis.m`).
 
-### Reproduce Summary Tables
-Clone the repository and execute `demo_all` in the MATLAB Command Window:
+### Reproduce Summary Tables & 10-KPI Figure
+Clone the repository and run `demo_all` and `plot_all_10_kpis` in the MATLAB Command Window:
 
 ```matlab
 git clone [https://github.com/Rajubahardar/BE---Final-year-project.git](https://github.com/Rajubahardar/BE---Final-year-project.git)
 cd('BE---Final-year-project');
 demo_all
+plot_all_10_kpis
 ```
 
-This reads the verified CSV datasets under `results/` and displays the complete `S1`–`S4` contingency tables and the 32-point `(H, D)` sensitivity sweep without re-running Simulink.
+This reads the verified CSV datasets under `results/` and reproduces the summary tables and the 300-DPI 10-KPI comparison figure without re-running Simulink.
 
 ---
 
