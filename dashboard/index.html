@@ -11,10 +11,11 @@
     * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
     body { margin: 0; background: var(--bg); color: var(--text); padding: 24px; }
     .container { max-width: 1400px; margin: 0 auto; }
-    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px; }
     h1 { margin: 0; font-size: 1.5rem; }
     .subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
-    .badge { background: rgba(56,189,248,0.15); color: var(--accent); border: 1px solid rgba(56,189,248,0.4); padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; text-decoration: none; }
+    .badge { background: rgba(56,189,248,0.15); color: var(--accent); border: 1px solid rgba(56,189,248,0.4); padding: 6px 12px; border-radius: 999px; font-size: 0.82rem; text-decoration: none; }
+    #statusBanner { font-size: 0.85rem; color: #4ade80; margin-bottom: 16px; }
     .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
     label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
     select, input[type=file] { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 0.9rem; }
@@ -44,8 +45,10 @@
     <a class="badge" href="https://github.com/Rajubahardar/BE---Final-year-project" target="_blank">GitHub Repository ↗</a>
   </header>
 
+  <div id="statusBanner">Loading benchmark CSV datasets...</div>
+
   <div id="fallbackBar">
-    <strong>Local file:// mode detected:</strong> Select <code>reviewer_fixed_all_scenarios.csv</code> and <code>decoupled_H_D_sensitivity.csv</code> from your <code>results/</code> folder to load data:
+    <strong>Offline / Local CSV Mode:</strong> Select <code>reviewer_fixed_all_scenarios.csv</code> and <code>decoupled_H_D_sensitivity.csv</code> from <code>results/</code>:
     <input type="file" id="csvPicker" accept=".csv" multiple style="margin-top:8px;" />
   </div>
 
@@ -97,12 +100,12 @@ function initDashboard() {
   if (sweepRows.length) {
     const sCols = Object.keys(sweepRows[0]).filter(c => isNumericCol(sweepRows, c));
     const sweepSel = document.getElementById('sweepMetricSelect');
-    const metricCols = sCols.slice(2);
+    const metricCols = sCols.length > 2 ? sCols.slice(2) : sCols;
     sweepSel.innerHTML = metricCols.map(c => `<option value="${c}">${c}</option>`).join('');
   }
 
   ['kpiSelect','scenSelect','scaleSelect','sweepMetricSelect'].forEach(id => {
-    document.getElementById(id).addEventListener('change', renderAll);
+    document.getElementById(id).onchange = renderAll;
   });
   renderAll();
 }
@@ -176,13 +179,40 @@ function renderAll() {
   }
 }
 
-function loadFromUrl() {
-  Promise.all([
-    new Promise((res, rej) => Papa.parse('../results/reviewer_fixed_all_scenarios.csv', { download: true, header: true, dynamicTyping: true, skipEmptyLines: true, complete: r => res(r.data), error: rej })),
-    new Promise((res, rej) => Papa.parse('../results/decoupled_H_D_sensitivity.csv', { download: true, header: true, dynamicTyping: true, skipEmptyLines: true, complete: r => res(r.data), error: rej }))
-  ]).then(([s1, s2]) => { scenRows = s1; sweepRows = s2; initDashboard(); })
-    .catch(() => { document.getElementById('fallbackBar').style.display = 'block'; });
+function parseCsvUrl(url) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(url, {
+      download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
+      complete: res => (res.data && res.data.length) ? resolve(res.data) : reject(new Error('Empty CSV')),
+      error: err => reject(err)
+    });
+  });
 }
+
+async function fetchDataset(filename) {
+  const candidates = [
+    `../results/${filename}`,
+    `./results/${filename}`,
+    `https://raw.githubusercontent.com/Rajubahardar/BE---Final-year-project/main/results/${filename}`
+  ];
+  for (const url of candidates) {
+    try { return await parseCsvUrl(url); } catch (e) {}
+  }
+  throw new Error(`Unable to fetch ${filename}`);
+}
+
+Promise.all([
+  fetchDataset('reviewer_fixed_all_scenarios.csv'),
+  fetchDataset('decoupled_H_D_sensitivity.csv')
+]).then(([s1, s2]) => {
+  scenRows = s1; sweepRows = s2;
+  document.getElementById('statusBanner').textContent = `Connected: ${scenRows.length} contingency rows and ${sweepRows.length} sweep points loaded.`;
+  initDashboard();
+}).catch(err => {
+  document.getElementById('statusBanner').style.color = '#f87171';
+  document.getElementById('statusBanner').textContent = err.message;
+  document.getElementById('fallbackBar').style.display = 'block';
+});
 
 document.getElementById('csvPicker').addEventListener('change', e => {
   [...e.target.files].forEach(file => {
@@ -193,8 +223,6 @@ document.getElementById('csvPicker').addEventListener('change', e => {
     }});
   });
 });
-
-loadFromUrl();
 </script>
 </body>
 </html>
