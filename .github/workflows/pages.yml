@@ -1,4 +1,4 @@
-﻿name: Deploy Dashboard to GitHub Pages
+name: Deploy Dashboard to GitHub Pages
 on:
   push:
     branches: [ main ]
@@ -31,12 +31,10 @@ jobs:
           cp -r dashboard/* _site/dashboard/
           cp results/*.csv _site/results/
           touch _site/.nojekyll
-          cat << 'EOF' > _site/index.html
-          <!DOCTYPE html>
-          <html><head><meta http-equiv="refresh" content="0; url=./dashboard/index.html" /></head>
-          <body><a href="./dashboard/index.html">Open Dashboard</a></body></html>
-          EOF
+          printf '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=./dashboard/index.html" /></head><body><a href="./dashboard/index.html">Open Dashboard</a></body></html>\n' > _site/index.html
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: '_site'
